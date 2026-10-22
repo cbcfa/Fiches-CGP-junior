@@ -3630,7 +3630,7 @@ window.fnApply=function(id,f){
   try{
   const root=document.querySelector('article.fiche');if(!root||!f||!f.blocks||f.id==='verif')return;
   if(root.querySelector('.fns'))return;
-  const skip=n=>{for(let p=n.parentElement;p&&p!==root;p=p.parentElement){const t=p.tagName;if(t==='SVG'||t==='svg'||t==='H1'||t==='H2'||t==='A'||t==='BUTTON'||t==='SUP'||t==='SCRIPT'||t==='STYLE'||t==='TEXTAREA'||t==='INPUT'||t==='SELECT'||p.classList.contains('pager')||p.classList.contains('bar')||p.classList.contains('fns')||p.classList.contains('vf')||p.classList.contains('wd')||p.classList.contains('widget'))return true}return false};
+  const skip=n=>{for(let p=n.parentElement;p&&p!==root;p=p.parentElement){const t=p.tagName;if(t==='SVG'||t==='svg'||t==='H1'||t==='H2'||t==='H3'||t==='H4'||t==='SUMMARY'||t==='A'||t==='BUTTON'||t==='SUP'||t==='SCRIPT'||t==='STYLE'||t==='TEXTAREA'||t==='INPUT'||t==='SELECT'||p.classList.contains('pager')||p.classList.contains('bar')||p.classList.contains('fns')||p.classList.contains('vf')||p.classList.contains('wd')||p.classList.contains('widget'))return true}return false};
   const nodes=[];const tw=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while(n=tw.nextNode()){if(n.nodeValue.trim()&&!skip(n))nodes.push(n)}
   let found=[];
   PAT.forEach(([keys,re],pi)=>{
@@ -3665,8 +3665,8 @@ window.fnApply=function(id,f){
   }
   const sec=document.createElement('section');sec.className='fns';
   sec.innerHTML='<h2>Notes et sources</h2><ol>'+order.map((k,i)=>`<li id="fn-${i+1}"><a class="fnl" href="${FN[k][1]}" target="_blank" rel="noopener noreferrer">${FN[k][0]}</a> <span class="fnd">· vérifié le 20/10/2026</span></li>`).join('')+'</ol>';
-  const pg=root.querySelector('.pager');
-  if(pg)pg.parentNode.insertBefore(sec,pg);else root.appendChild(sec);
+  const pg=[...root.querySelectorAll('.pager')].filter(x=>!x.closest('.fl-ans')).pop();
+  if(pg)pg.parentNode.insertBefore(sec,pg);else (root.querySelector('.fiche')||root).appendChild(sec);
   }catch(e){console.error('fn',e)}
 };
 const _p=postRender;
@@ -3681,7 +3681,7 @@ window.startHTML=function(){
   const all=st.flatMap(x=>x.ids),done=all.filter(i=>sn.has(i)).length,next=all.find(i=>!sn.has(i));
   const nf=next&&F.find(f=>f.id===next);
   const btn=nf?`<button class="stgo" onclick="go('${next}')">${done?'Continuer':'Commencer'} : ${nf.title} ›</button>`:`<button class="stgo" onclick="go('quiz')">Parcours terminé : teste-toi avec le quiz ›</button>`;
-  return `<section class="stbox" aria-label="Parcours débutant"><h2>Parcours débutant</h2><p class="stl">Aucun prérequis. ${all.length} fiches dans l’ordre, du plus simple au plus complexe, puis le quiz.</p><div class="stp" role="progressbar" aria-valuemin="0" aria-valuemax="${all.length}" aria-valuenow="${done}"><i style="width:${Math.round(done/all.length*100)}%"></i></div><p class="stn">${done} fiche${done>1?'s':''} sur ${all.length}</p>${btn}<ol class="stl2">${st.map((x,i)=>{const n=x.ids.filter(j=>sn.has(j)).length,fin=n===x.ids.length;return `<li class="${fin?'ok':''}"><button onclick="go('${x.ids.find(j=>!sn.has(j))||x.ids[0]}')"><b>${fin?'✓':i+1}</b><span>${x.t}<small>${x.ids.length} fiche${x.ids.length>1?'s':''}</small></span></button></li>`}).join('')}</ol></section>`}catch(e){console.error('start',e);return ''}
+  return `<section class="stbox" aria-label="Parcours débutant"><h2>Parcours débutant</h2><p class="stl">Aucun prérequis. ${all.length} fiches dans l’ordre, du plus simple au plus complexe, puis le quiz.</p><div class="stp" role="progressbar" aria-label="Progression des fiches lues" aria-valuemin="0" aria-valuemax="${all.length}" aria-valuenow="${done}"><i style="width:${Math.round(done/all.length*100)}%"></i></div><p class="stn">${done} fiche${done>1?'s':''} sur ${all.length}</p>${btn}<ol class="stl2">${st.map((x,i)=>{const n=x.ids.filter(j=>sn.has(j)).length,fin=n===x.ids.length;return `<li class="${fin?'ok':''}"><button onclick="go('${x.ids.find(j=>!sn.has(j))||x.ids[0]}')"><b>${fin?'✓':i+1}</b><span>${x.t}<small>${x.ids.length} fiche${x.ids.length>1?'s':''}</small></span></button></li>`}).join('')}</ol></section>`}catch(e){console.error('start',e);return ''}
 };
 const st2=document.createElement('style');
 st2.textContent='.stbox{background:var(--card,#fff);border:1.5px solid var(--line,#d6dde8);border-left:6px solid #2A7230;border-radius:14px;padding:14px 16px;margin:14px 0}.stbox h2{margin:0 0 4px;font-size:1.1rem}.stbox .stl{margin:0 0 8px;font-size:.88rem;color:var(--mut,#566880)}.stbox .stp{height:8px;border-radius:99px;background:var(--line,#d6dde8);overflow:hidden}.stbox .stp i{display:block;height:100%;background:#2A7230;border-radius:99px}.stbox .stn{margin:4px 0 10px;font-size:.8rem;color:var(--mut,#566880)}.stbox .stgo{width:100%;min-height:44px;border:0;border-radius:10px;background:#2A7230;color:#fff;font-weight:700;font-size:.95rem;padding:10px 14px;cursor:pointer;text-align:left}.stbox .stgo:hover{filter:brightness(1.1)}.stbox .stl2{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}.stbox .stl2 button{width:100%;display:flex;gap:10px;align-items:center;background:transparent;border:1px solid var(--line,#d6dde8);border-radius:10px;padding:8px 10px;min-height:44px;cursor:pointer;color:inherit;text-align:left;font:inherit}.stbox .stl2 b{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line,#d6dde8);font-size:.8rem}.stbox .stl2 li.ok b{background:#2A7230;color:#fff}.stbox .stl2 small{display:block;color:var(--mut,#566880);font-size:.75rem}';
@@ -4337,7 +4337,7 @@ function tipLookup(txt){
   if(e.cs){const raw=txt.replace(/[sx]$/,e.raw.endsWith('s')?'$&':'');if(txt!==e.raw&&raw!==e.raw)return null}
   return e;
 }
-const TIPSKIP='a,button,input,textarea,select,script,style,svg,h1,h2,h3,summary,.tip,.w,.bar,.tools,.ixr,.fld,.fl-ans,.chrono';
+const TIPSKIP='a,button,input,textarea,select,script,style,svg,h1,.tip,.w,.bar,.tools,.ixr,.fld,.fl-ans,.chrono';
 function tipDecorate(root){
   tipInit();
   const seen=new WeakMap();
@@ -4359,6 +4359,7 @@ function tipDecorate(root){
     }
     if(frag){if(last<txt.length)frag.appendChild(document.createTextNode(txt.slice(last)));node.parentNode.replaceChild(frag,node)}
   }
+  root.querySelectorAll('h2,h3,h4,summary').forEach(h=>{if(h.querySelector('.tip')&&!h.querySelector(':scope>span.hw')){const w=document.createElement('span');w.className='hw';while(h.firstChild)w.appendChild(h.firstChild);h.appendChild(w)}});
 }
 
 
@@ -4731,7 +4732,7 @@ function ixChips(){
   document.addEventListener('focusout',e=>{if(!pinned&&!(e.relatedTarget&&box.contains(e.relatedTarget)))hide()});
   document.addEventListener('click',e=>{
     const t=e.target.closest&&e.target.closest('.tip');
-    if(t){if(pinned&&cur===t){hide();return}pinned=true;show(t,true);return}
+    if(t){if(t.closest('summary'))e.preventDefault();if(pinned&&cur===t){hide();return}pinned=true;show(t,true);return}
     if(box.contains(e.target))return;hide();
   });
   document.addEventListener('keydown',e=>{
@@ -4852,7 +4853,7 @@ function homeGS(q){
 /* ---------- clavier, balayage, impression ---------- */
 document.addEventListener('keydown',e=>{if(window.__srsKey&&curId()==='revision')window.__srsKey(e)});
 document.addEventListener('click',e=>{
-  const ia=e.target.closest&&e.target.closest("a[href^='#/']");if(ia&&!e.defaultPrevented&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey){e.preventDefault();go(ia.getAttribute('href').slice(2));return}
+  const ia=e.target.closest&&e.target.closest("a[href^='#/']");if(ia&&!e.defaultPrevented&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey&&!(ia.target&&window.top===window)){e.preventDefault();go(ia.getAttribute('href').slice(2));return}
   const g=e.target.closest&&e.target.closest('[data-gs]');if(g){gsOpen('');return}
   const p=e.target.closest&&e.target.closest('[data-pr]');if(p){try{window.print()}catch(x){}}
 });
@@ -5551,7 +5552,7 @@ const D=[
 ['Tracfin','service de l’État qui reçoit les déclarations de soupçon des professionnels assujettis à la lutte contre le blanchiment (LCB-FT). La déclaration est confidentielle : le client ne doit pas en être informé.',['Tracfin','TRACFIN']],
 ['Apporteur d’affaires','intermédiaire qui met en relation un client et un professionnel sans participer à la conclusion du contrat. Son activité est encadrée, notamment sur le plan de la rémunération et de la responsabilité.',['apporteur d’affaires']],
 ['Tracker (ETF)','fonds indiciel coté qui réplique la performance d’un indice. Les ETF sont les trackers les plus connus.',['tracker','trackers']],
-['Notation financière','note attribuée par une agence (S&P, Moody’s, Fitch) à la solvabilité d’un émetteur. Catégorie « investment grade » (IG, de AAA à BBB-) ou « haut rendement » (HY, en dessous de BBB-).',['notation','BBB','HY','investment grade','haut rendement']],
+['Notation financière','note attribuée par une agence (S&P, Moody’s, Fitch) à la solvabilité d’un émetteur. Catégorie « investment grade » (IG, de AAA à BBB-) ou « haut rendement » (HY, en dessous de BBB-).',['notation financière','notation','BBB']],
 ['Préfon','association de retraite supplémentaire destinée aux agents de la fonction publique et assimilés, qui verse une rente viagère. Les cotisations sont déductibles sous conditions.',['Préfon','PREFON']],
 ['Adhérent','personne qui adhère à un contrat collectif souscrit par une association ou une entreprise (contrat de groupe), par différence avec le souscripteur qui signe le contrat.',['adhérent','adhérents']],
 ['Cotation','processus de fixation du prix d’un actif sur un marché. Un titre coté se négocie sur un marché organisé à un prix publié.',['cotation']],
@@ -5593,6 +5594,510 @@ const T=new Set(NOT.map(n=>n[0]));
 [['PME','Dispositifs IR-PME'],['FCPI','Souscriptions au capital de FCPI'],['FIP','Souscriptions au capital de FIP'],['PTZ','Prêt PTZ'],['in fine','Crédit in fine'],['épargne retraite','PER (Plan d’épargne retraite)'],['capital variable','SCPI à capital variable'],['capital fixe','SCPI à capital fixe'],['BIC','Revenus BIC'],['cliquet','Effet cliquet'],['compromis','Compromis de vente'],['apport personnel','Apport personnel']].forEach(([a,t])=>{if(T.has(t))A.push([a,t]);else console.warn('alias sans cible',t)});
 D.forEach(([t,d,a])=>{add(t,d,'p');a.forEach(x=>A.push([x,t]))});
 (window.TIPALIAS=window.TIPALIAS||[]).push(...A);
+})();
+
+/* ---------- v9.27 : outils communs, index (définitions demandées) ---------- */
+(function(){
+const SV={"idxchart": "<figure class=\"svgb\" style=\"margin:0\"><svg viewBox=\"0 0 360 250\" role=\"img\" aria-label=\"Performance de cinq grands indices de fin 1995 à fin 2025, base 100, échelle logarithmique\"><line x1=\"34\" y1=\"188.1\" x2=\"256\" y2=\"188.1\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"191.6\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">100</text><line x1=\"34\" y1=\"150.1\" x2=\"256\" y2=\"150.1\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"153.6\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">200</text><line x1=\"34\" y1=\"100.0\" x2=\"256\" y2=\"100.0\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"103.5\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">500</text><line x1=\"34\" y1=\"62.1\" x2=\"256\" y2=\"62.1\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"65.6\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">1000</text><line x1=\"34\" y1=\"24.2\" x2=\"256\" y2=\"24.2\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"27.7\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2000</text><text x=\"34.0\" y=\"232.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">1995</text><line x1=\"34.0\" y1=\"216\" x2=\"34.0\" y2=\"220\" style=\"stroke:var(--muted)\"/><text x=\"71.0\" y=\"232.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2000</text><line x1=\"71.0\" y1=\"216\" x2=\"71.0\" y2=\"220\" style=\"stroke:var(--muted)\"/><text x=\"108.0\" y=\"232.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2005</text><line x1=\"108.0\" y1=\"216\" x2=\"108.0\" y2=\"220\" style=\"stroke:var(--muted)\"/><text x=\"145.0\" y=\"232.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2010</text><line x1=\"145.0\" y1=\"216\" x2=\"145.0\" y2=\"220\" style=\"stroke:var(--muted)\"/><text x=\"182.0\" y=\"232.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2015</text><line x1=\"182.0\" y1=\"216\" x2=\"182.0\" y2=\"220\" style=\"stroke:var(--muted)\"/><text x=\"219.0\" y=\"232.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2020</text><line x1=\"219.0\" y1=\"216\" x2=\"219.0\" y2=\"220\" style=\"stroke:var(--muted)\"/><text x=\"256.0\" y=\"232.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2025</text><line x1=\"256.0\" y1=\"216\" x2=\"256.0\" y2=\"220\" style=\"stroke:var(--muted)\"/><polyline points=\"34.0,188.1 41.4,176.7 48.8,161.0 56.2,147.3 63.6,136.8 71.0,142.0 78.4,149.0 85.8,162.6 93.2,148.8 100.6,143.2 108.0,140.6 115.4,132.5 122.8,129.6 130.2,154.9 137.6,142.1 145.0,134.4 152.4,133.2 159.8,125.1 167.2,109.8 174.6,102.7 182.0,102.0 189.4,95.8 196.8,85.0 204.2,87.5 211.6,72.5 219.0,63.3 226.4,49.5 233.8,60.4 241.2,47.6 248.6,35.4 256.0,26.4\" style=\"fill:none;stroke:var(--c1);stroke-width:2\"/><polyline points=\"34.0,188.1 41.4,180.9 48.8,172.7 56.2,160.5 63.6,148.2 71.0,155.8 78.4,165.6 85.8,177.5 93.2,161.6 100.6,153.9 108.0,148.6 115.4,138.4 122.8,133.4 130.2,161.6 137.6,146.9 145.0,140.6 152.4,143.4 159.8,135.0 167.2,121.8 174.6,118.8 182.0,119.0 189.4,114.7 196.8,103.4 204.2,108.1 211.6,94.4 219.0,86.0 226.4,75.0 233.8,85.7 241.2,73.7 248.6,64.1 256.0,53.4\" style=\"fill:none;stroke:var(--c2);stroke-width:2\"/><polyline points=\"34.0,188.1 41.4,176.4 48.8,162.3 56.2,147.3 63.6,125.7 71.0,125.0 78.4,138.6 85.8,161.1 93.2,152.9 100.6,149.0 108.0,137.5 115.4,128.7 122.8,128.0 130.2,158.4 137.6,147.4 145.0,149.3 152.4,159.4 159.8,151.7 167.2,142.6 174.6,142.9 182.0,138.4 189.4,135.9 196.8,131.0 204.2,137.4 211.6,124.6 219.0,128.6 226.4,114.7 233.8,120.2 241.2,111.8 248.6,113.0 256.0,107.6\" style=\"fill:none;stroke:var(--c3);stroke-width:2\"/><polyline points=\"34.0,188.1 41.4,176.8 48.8,159.7 56.2,144.5 63.6,123.5 71.0,125.0 78.4,137.4 85.8,162.9 93.2,154.9 100.6,151.3 108.0,140.7 115.4,133.0 122.8,129.4 130.2,161.4 137.6,151.0 145.0,154.3 152.4,164.5 159.8,157.5 167.2,148.5 174.6,147.8 182.0,145.7 189.4,145.3 196.8,141.9 204.2,150.4 211.6,138.3 219.0,141.1 226.4,130.7 233.8,137.5 241.2,128.0 248.6,123.6 256.0,114.4\" style=\"fill:none;stroke:var(--c4);stroke-width:2;stroke-dasharray:5 3\"/><polyline points=\"34.0,188.1 41.4,189.5 48.8,202.5 56.2,207.8 63.6,190.7 71.0,208.0 78.4,222.7 85.8,234.0 93.2,222.1 100.6,218.0 108.0,199.5 115.4,195.9 122.8,202.4 130.2,232.2 137.6,222.7 145.0,224.4 152.4,234.7 159.8,223.5 167.2,198.9 174.6,195.2 182.0,190.4 189.4,190.2 196.8,180.6 204.2,187.7 211.6,178.5 219.0,170.4 226.4,167.8 233.8,173.2 241.2,159.6 248.6,149.9 256.0,137.2\" style=\"fill:none;stroke:var(--warn);stroke-width:2\"/><text x=\"260.0\" y=\"29.9\" text-anchor=\"start\" style=\"font-size:9.5px;font-weight:700;fill:var(--c1)\">S&amp;P 500 1921</text><text x=\"260.0\" y=\"56.9\" text-anchor=\"start\" style=\"font-size:9.5px;font-weight:700;fill:var(--c2)\">MSCI World 1172</text><text x=\"260.0\" y=\"111.1\" text-anchor=\"start\" style=\"font-size:9.5px;font-weight:700;fill:var(--c3)\">CAC 40 435</text><text x=\"260.0\" y=\"122.1\" text-anchor=\"start\" style=\"font-size:9.5px;font-weight:700;fill:var(--c4)\">Euro Stoxx 50 384</text><text x=\"260.0\" y=\"140.7\" text-anchor=\"start\" style=\"font-size:9.5px;font-weight:700;fill:var(--warn)\">Nikkei 225 253</text><line x1=\"34\" y1=\"188.1\" x2=\"256\" y2=\"188.1\" style=\"stroke:var(--muted);stroke-width:1\"/></svg><figcaption>Base 100 à fin 1995, échelle logarithmique (chaque graduation multiplie par 2 à 2,5). Valeurs à fin 2025. S&amp;P 500 et MSCI World : dividendes réinvestis, en dollars. CAC 40, Euro Stoxx 50 et Nikkei 225 : indices de prix, hors dividendes, en monnaie locale. Ne compare donc pas les courbes « à armes égales ». Sources : Wikipédia (rendements annuels du S&amp;P 500 et du MSCI World ; clôtures annuelles du CAC 40, de l’Euro Stoxx 50 et du Nikkei 225), à recouper avec S&amp;P Dow Jones Indices, MSCI et Euronext.</figcaption></figure>", "fechart": "<figure class=\"svgb\" style=\"margin:0\"><svg viewBox=\"0 0 360 196\" role=\"img\" aria-label=\"Rendement moyen annuel des fonds en euros : 2000, puis 2021 à 2025\"><line x1=\"34\" y1=\"162.0\" x2=\"352\" y2=\"162.0\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"165.5\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">0 %</text><line x1=\"34\" y1=\"137.7\" x2=\"352\" y2=\"137.7\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"141.2\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">1 %</text><line x1=\"34\" y1=\"113.3\" x2=\"352\" y2=\"113.3\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"116.8\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2 %</text><line x1=\"34\" y1=\"89.0\" x2=\"352\" y2=\"89.0\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"92.5\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">3 %</text><line x1=\"34\" y1=\"64.7\" x2=\"352\" y2=\"64.7\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"68.2\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">4 %</text><line x1=\"34\" y1=\"40.3\" x2=\"352\" y2=\"40.3\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"43.8\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">5 %</text><line x1=\"34\" y1=\"16.0\" x2=\"352\" y2=\"16.0\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"19.5\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">6 %</text><rect x=\"40.7\" y=\"33.0\" width=\"32\" height=\"129.0\" rx=\"3\" style=\"fill:var(--muted);opacity:.85\"/><text x=\"56.7\" y=\"29.0\" text-anchor=\"middle\" style=\"font-size:11px;font-weight:700;fill:var(--ink)\">5,3</text><text x=\"56.7\" y=\"178.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2000</text><text x=\"102.1\" y=\"137.7\" text-anchor=\"middle\" style=\"font-size:16px;font-weight:400;fill:var(--muted)\">…</text><rect x=\"131.6\" y=\"130.4\" width=\"32\" height=\"31.6\" rx=\"3\" style=\"fill:var(--c1);opacity:.85\"/><text x=\"147.6\" y=\"126.4\" text-anchor=\"middle\" style=\"font-size:11px;font-weight:700;fill:var(--ink)\">1,3</text><text x=\"147.6\" y=\"178.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2021</text><rect x=\"177.0\" y=\"115.8\" width=\"32\" height=\"46.2\" rx=\"3\" style=\"fill:var(--c1);opacity:.85\"/><text x=\"193.0\" y=\"111.8\" text-anchor=\"middle\" style=\"font-size:11px;font-weight:700;fill:var(--ink)\">1,9</text><text x=\"193.0\" y=\"178.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2022</text><rect x=\"222.4\" y=\"98.7\" width=\"32\" height=\"63.3\" rx=\"3\" style=\"fill:var(--c1);opacity:.85\"/><text x=\"238.4\" y=\"94.7\" text-anchor=\"middle\" style=\"font-size:11px;font-weight:700;fill:var(--ink)\">2,6</text><text x=\"238.4\" y=\"178.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2023</text><rect x=\"267.9\" y=\"98.7\" width=\"32\" height=\"63.3\" rx=\"3\" style=\"fill:var(--c1);opacity:.85\"/><text x=\"283.9\" y=\"94.7\" text-anchor=\"middle\" style=\"font-size:11px;font-weight:700;fill:var(--ink)\">2,6</text><text x=\"283.9\" y=\"178.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2024</text><rect x=\"313.3\" y=\"98.7\" width=\"32\" height=\"63.3\" rx=\"3\" style=\"fill:var(--c1);opacity:.85\"/><text x=\"329.3\" y=\"94.7\" text-anchor=\"middle\" style=\"font-size:11px;font-weight:700;fill:var(--ink)\">2,6</text><text x=\"329.3\" y=\"178.0\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">2025</text></svg><figcaption>Rendement moyen servi, net de frais de gestion et avant prélèvements sociaux. 5,3 % en 2000 (LeComparateurAssurance) ; 1,3 % en 2021, 1,9 % en 2022 et 2,6 % en 2023, 2024 et 2025 (France Assureurs, ACPR, via Meilleurtaux et Eco3min). Les années 2001 à 2020 ne sont pas reprises ici faute de série officielle vérifiée.</figcaption></figure>", "acschema": "<figure class=\"svgb\" style=\"margin:0\"><svg viewBox=\"0 0 360 232\" role=\"img\" aria-label=\"Schéma d’un autocall : test annuel, rappel ou poursuite, test final\"><rect x=\"8\" y=\"12\" width=\"100\" height=\"40\" rx=\"6\" style=\"fill:var(--card,var(--bg));stroke:var(--c1);stroke-width:1.5\"/><text x=\"58.0\" y=\"29.5\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:700;fill:var(--ink)\">Début</text><text x=\"58.0\" y=\"42.5\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--ink)\">Tu investis 100 €</text><line x1=\"108\" y1=\"32\" x2=\"124\" y2=\"32\" style=\"stroke:var(--muted);stroke-width:1.5\"/><polygon points=\"124,32 118.0,29.0 118.0,35.0\" style=\"fill:var(--muted)\"/><rect x=\"124\" y=\"12\" width=\"228\" height=\"40\" rx=\"6\" style=\"fill:var(--card,var(--bg));stroke:var(--c4);stroke-width:1.5\"/><text x=\"238.0\" y=\"29.5\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--ink)\">Chaque année : l’indice est-il</text><text x=\"238.0\" y=\"42.5\" text-anchor=\"middle\" style=\"font-size:10px;font-weight:400;fill:var(--ink)\">au moins à son niveau de départ (100 %) ?</text><line x1=\"300\" y1=\"52\" x2=\"300\" y2=\"86\" style=\"stroke:var(--good);stroke-width:1.5\"/><polygon points=\"300,86 303.0,80.0 297.0,80.0\" style=\"fill:var(--good)\"/><text x=\"312.0\" y=\"74.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:700;fill:var(--good)\">OUI</text><rect x=\"214\" y=\"86\" width=\"138\" height=\"50\" rx=\"6\" style=\"fill:var(--card,var(--bg));stroke:var(--good);stroke-width:1.5\"/><text x=\"283.0\" y=\"102.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--ink)\">Rappel : le produit s’arrête</text><text x=\"283.0\" y=\"115.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--ink)\">100 € + coupon</text><text x=\"283.0\" y=\"128.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--ink)\">(ex. 8 % × années)</text><line x1=\"150\" y1=\"52\" x2=\"150\" y2=\"86\" style=\"stroke:var(--warn);stroke-width:1.5\"/><polygon points=\"150,86 153.0,80.0 147.0,80.0\" style=\"fill:var(--warn)\"/><text x=\"162.0\" y=\"74.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:700;fill:var(--warn)\">NON</text><rect x=\"8\" y=\"86\" width=\"196\" height=\"50\" rx=\"6\" style=\"fill:var(--card,var(--bg));stroke:var(--warn);stroke-width:1.5\"/><text x=\"106.0\" y=\"108.5\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--ink)\">On continue</text><text x=\"106.0\" y=\"121.5\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--ink)\">jusqu’à la date suivante</text><line x1=\"100\" y1=\"136\" x2=\"100\" y2=\"158\" style=\"stroke:var(--muted);stroke-width:1.5\"/><polygon points=\"100,158 103.0,152.0 97.0,152.0\" style=\"fill:var(--muted)\"/><rect x=\"8\" y=\"158\" width=\"344\" height=\"36\" rx=\"6\" style=\"fill:var(--card,var(--bg));stroke:var(--c4);stroke-width:1.5\"/><text x=\"180.0\" y=\"173.5\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--ink)\">Dernière date (ex. année 6) :</text><text x=\"180.0\" y=\"186.5\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--ink)\">l’indice est-il au-dessus de la barrière de protection (ex. 60 %) ?</text><line x1=\"90\" y1=\"194\" x2=\"90\" y2=\"208\" style=\"stroke:var(--good);stroke-width:1.5\"/><polygon points=\"90,208 93.0,202.0 87.0,202.0\" style=\"fill:var(--good)\"/><text x=\"102.0\" y=\"206.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:700;fill:var(--good)\">OUI</text><text x=\"8.0\" y=\"226.0\" text-anchor=\"start\" style=\"font-size:9.5px;font-weight:700;fill:var(--ink)\">Capital rendu, sans coupon</text><line x1=\"290\" y1=\"194\" x2=\"290\" y2=\"208\" style=\"stroke:var(--bad);stroke-width:1.5\"/><polygon points=\"290,208 293.0,202.0 287.0,202.0\" style=\"fill:var(--bad)\"/><text x=\"302.0\" y=\"206.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:700;fill:var(--bad)\">NON</text><text x=\"352.0\" y=\"226.0\" text-anchor=\"end\" style=\"font-size:9.5px;font-weight:700;fill:var(--bad)\">Perte comme l’indice</text></svg><figcaption>Schéma d’un autocall de type Athéna, valeurs d’exemple. Le détail (barrières, coupons, durée) est toujours dans la brochure du produit.</figcaption></figure>", "acpaths": "<figure class=\"svgb\" style=\"margin:0\"><svg viewBox=\"0 0 360 246\" role=\"img\" aria-label=\"Trois trajectoires d’indice sur six ans pour un autocall\"><line x1=\"34\" y1=\"180.0\" x2=\"290\" y2=\"180.0\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"183.5\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">40 %</text><line x1=\"34\" y1=\"138.5\" x2=\"290\" y2=\"138.5\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"142.0\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">60 %</text><line x1=\"34\" y1=\"97.0\" x2=\"290\" y2=\"97.0\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"100.5\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">80 %</text><line x1=\"34\" y1=\"55.5\" x2=\"290\" y2=\"55.5\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"59.0\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">100 %</text><line x1=\"34\" y1=\"14.0\" x2=\"290\" y2=\"14.0\" style=\"stroke:var(--line);stroke-width:1\"/><text x=\"30.0\" y=\"17.5\" text-anchor=\"end\" style=\"font-size:10px;font-weight:400;fill:var(--muted)\">120 %</text><text x=\"34.0\" y=\"194.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--muted)\">départ</text><text x=\"76.7\" y=\"194.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--muted)\">an 1</text><text x=\"119.3\" y=\"194.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--muted)\">an 2</text><text x=\"162.0\" y=\"194.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--muted)\">an 3</text><text x=\"204.7\" y=\"194.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--muted)\">an 4</text><text x=\"247.3\" y=\"194.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--muted)\">an 5</text><text x=\"290.0\" y=\"194.0\" text-anchor=\"middle\" style=\"font-size:9.5px;font-weight:400;fill:var(--muted)\">an 6</text><line x1=\"34\" y1=\"55.5\" x2=\"290\" y2=\"55.5\" style=\"stroke:var(--good);stroke-width:1.5;stroke-dasharray:5 3\"/><text x=\"294.0\" y=\"59.0\" text-anchor=\"start\" style=\"font-size:9px;font-weight:700;fill:var(--good)\">rappel 100 %</text><line x1=\"34\" y1=\"138.5\" x2=\"290\" y2=\"138.5\" style=\"stroke:var(--bad);stroke-width:1.5;stroke-dasharray:5 3\"/><text x=\"294.0\" y=\"142.0\" text-anchor=\"start\" style=\"font-size:9px;font-weight:700;fill:var(--bad)\">barrière 60 %</text><polyline points=\"34.0,55.5 76.7,76.2 119.3,65.9 162.0,51.3\" style=\"fill:none;stroke:var(--c1);stroke-width:2.2\"/><circle cx=\"34.0\" cy=\"55.5\" r=\"2.6\" style=\"fill:var(--c1)\"/><circle cx=\"76.7\" cy=\"76.2\" r=\"2.6\" style=\"fill:var(--c1)\"/><circle cx=\"119.3\" cy=\"65.9\" r=\"2.6\" style=\"fill:var(--c1)\"/><circle cx=\"162.0\" cy=\"51.3\" r=\"2.6\" style=\"fill:var(--c1)\"/><polyline points=\"34.0,55.5 76.7,76.2 119.3,97.0 162.0,107.4 204.7,117.8 247.3,128.1 290.0,117.8\" style=\"fill:none;stroke:var(--c4);stroke-width:2.2\"/><circle cx=\"34.0\" cy=\"55.5\" r=\"2.6\" style=\"fill:var(--c4)\"/><circle cx=\"76.7\" cy=\"76.2\" r=\"2.6\" style=\"fill:var(--c4)\"/><circle cx=\"119.3\" cy=\"97.0\" r=\"2.6\" style=\"fill:var(--c4)\"/><circle cx=\"162.0\" cy=\"107.4\" r=\"2.6\" style=\"fill:var(--c4)\"/><circle cx=\"204.7\" cy=\"117.8\" r=\"2.6\" style=\"fill:var(--c4)\"/><circle cx=\"247.3\" cy=\"128.1\" r=\"2.6\" style=\"fill:var(--c4)\"/><circle cx=\"290.0\" cy=\"117.8\" r=\"2.6\" style=\"fill:var(--c4)\"/><polyline points=\"34.0,55.5 76.7,86.6 119.3,117.8 162.0,128.1 204.7,107.4 247.3,97.0 290.0,148.9\" style=\"fill:none;stroke:var(--warn);stroke-width:2.2\"/><circle cx=\"34.0\" cy=\"55.5\" r=\"2.6\" style=\"fill:var(--warn)\"/><circle cx=\"76.7\" cy=\"86.6\" r=\"2.6\" style=\"fill:var(--warn)\"/><circle cx=\"119.3\" cy=\"117.8\" r=\"2.6\" style=\"fill:var(--warn)\"/><circle cx=\"162.0\" cy=\"128.1\" r=\"2.6\" style=\"fill:var(--warn)\"/><circle cx=\"204.7\" cy=\"107.4\" r=\"2.6\" style=\"fill:var(--warn)\"/><circle cx=\"247.3\" cy=\"97.0\" r=\"2.6\" style=\"fill:var(--warn)\"/><circle cx=\"290.0\" cy=\"148.9\" r=\"2.6\" style=\"fill:var(--warn)\"/><rect x=\"34\" y=\"206\" width=\"10\" height=\"4\" style=\"fill:var(--c1)\"/><text x=\"50.0\" y=\"211.0\" text-anchor=\"start\" style=\"font-size:9.5px;font-weight:600;fill:var(--ink)\">B : rappelé en année 3</text><rect x=\"34\" y=\"219\" width=\"10\" height=\"4\" style=\"fill:var(--c4)\"/><text x=\"50.0\" y=\"224.0\" text-anchor=\"start\" style=\"font-size:9.5px;font-weight:600;fill:var(--ink)\">D : jamais rappelé, capital rendu</text><rect x=\"34\" y=\"232\" width=\"10\" height=\"4\" style=\"fill:var(--warn)\"/><text x=\"50.0\" y=\"237.0\" text-anchor=\"start\" style=\"font-size:9.5px;font-weight:600;fill:var(--ink)\">C : perte finale de 45 %</text></svg><figcaption>Niveau de l’indice à chaque date annuelle, en % du niveau de départ. Trajectoires inventées pour l’exemple.</figcaption></figure>"};
+Object.assign(SVG,SV);
+window.F927={
+  fi:id=>F.find(f=>f.id===id),
+  hi:(f,t)=>f.blocks.findIndex(b=>b.t==='h'&&b.text.indexOf(t)===0),
+  lk:(id,label)=>`<a class="xl" href="#/${id}" target="_blank" rel="noopener">${label}<span aria-hidden="true"> ↗</span></a>`,
+  NEW:[]
+};
+const add=(t,d,k)=>{if(!NOT.some(n=>n[0]===t))NOT.push([t,d,k||'p']);F927.NEW.push(t)};
+const A=[];const al=(t,...a)=>a.forEach(x=>A.push([x,t]));
+// --- alias vers entrées existantes
+al('Biais de valeur (Value vs Growth)','value','growth','value / growth','actions de valeur','actions de croissance');
+al('Investment Grade','IG','investment grade');
+al('Obligation à haut rendement (High Yield)','HY','high yield','haut rendement');
+al('Fonds evergreen (Fonds perpétuel)','evergreen','fonds evergreen','fonds perpétuel');
+al('Assurance-vie','AV');
+al('Loi Sapin 2','Sapin 2','Sapin II','loi Sapin 2');
+al('PEA PME-ETI','PEA-PME','PEA PME');
+al('Capital-investissement (Private Equity)','PE','private equity','capital-investissement');
+al('Produits structurés','structurés','structuré','structurée','structurées','produit structuré');
+al('Ratio de Sharpe','Sharpe','ratio de Sharpe');
+// --- nouvelles entrées
+add('Small cap / Large cap','small cap : société cotée de petite capitalisation boursière ; large cap : société de grande capitalisation. Les seuils ne sont pas réglementaires et varient selon les fournisseurs d’indices. Les petites capitalisations sont en général plus volatiles et moins liquides ; les grandes sont plus diversifiées, plus suivies, plus stables.');
+al('Small cap / Large cap','small','small cap','small caps','large cap','large caps','small / large','petites capitalisations','grandes capitalisations');
+add('Gestion active / gestion passive','gestion active : le gérant choisit les titres pour battre un indice (frais plus élevés, résultat incertain). Gestion passive (ou indicielle) : le fonds réplique un indice (ETF, fonds indiciel), à frais bas, sans chercher à le battre. La différence se joue d’abord sur les frais.');
+al('Gestion active / gestion passive','gestion active','gestion passive','actif / passif','active ou passive','gestion indicielle','fonds indiciel','fonds indiciels');
+add('Inflation','hausse générale et durable des prix, qui réduit le pouvoir d’achat. En France, l’Insee la mesure avec l’indice des prix à la consommation (IPC) ; Eurostat publie l’IPCH pour la zone euro. Taux réel ≈ (1 + taux nominal) ÷ (1 + inflation) − 1 : un placement qui rapporte moins que l’inflation perd du pouvoir d’achat.');
+al('Inflation','inflation');
+add('Hausse des taux','quand les banques centrales relèvent leurs taux : le crédit coûte plus cher, les obligations déjà émises perdent de la valeur (leur coupon est plus faible que celui des nouvelles), les placements de trésorerie et les nouvelles obligations rapportent davantage, et les actions très valorisées sont souvent pénalisées. Les fonds euros s’ajustent lentement, au rythme du renouvellement des obligations.');
+al('Hausse des taux','hausse des taux','hausse des taux d’intérêt','montée des taux','remontée des taux','taux en hausse');
+add('€STR (taux court de l’euro)','taux d’intérêt au jour le jour de la zone euro, publié par la BCE depuis octobre 2019. Il mesure le coût des emprunts non garantis d’une journée entre grandes banques. Il a remplacé l’EONIA et sert de référence aux fonds monétaires en euros.');
+al('€STR (taux court de l’euro)','€STR','ESTR');
+add('Euribor','taux auquel des banques de l’Union européenne se prêtent entre elles, pour des échéances de 1 semaine à 12 mois ; publié par l’EMMI. Il sert de référence à de nombreux crédits à taux variable. Ne pas confondre avec l’€STR, qui est un taux au jour le jour.');
+al('Euribor','Euribor');
+add('Courbe des taux','graphique des taux d’intérêt selon la durée de l’emprunt (3 mois, 2 ans, 10 ans…). Normale : plus on prête longtemps, plus on est payé. Plate : peu d’écart. Inversée : les taux courts dépassent les taux longs (signal souvent associé à une récession). Sa pente indique les anticipations des marchés.');
+al('Courbe des taux','courbe des taux','courbe de taux');
+add('Politique monétaire','action de la banque centrale (BCE pour la zone euro) pour contrôler l’inflation et soutenir l’économie, surtout en fixant ses taux directeurs.');
+al('Politique monétaire','politique monétaire');
+add('ETC (Exchange Traded Commodity)','titre coté en Bourse qui suit le cours d’une matière première (or, pétrole, métaux…), adossé à du métal physique ou à des contrats. Ce n’est pas un OPCVM : il n’est pas éligible au PEA et son risque dépend de sa structure (garanties, émetteur). À ne pas confondre avec un ETF.');
+al('ETC (Exchange Traded Commodity)','ETC');
+add('Réplication physique / synthétique','physique : l’ETF détient réellement les titres de l’indice (tous ou un échantillon). Synthétique : l’ETF conclut un contrat d’échange (swap) avec une banque qui lui verse la performance de l’indice ; il apparaît alors un risque de contrepartie, encadré par la réglementation OPCVM. Le synthétique est utilisé pour les indices difficiles à répliquer et pour des ETF éligibles au PEA sur le monde.');
+al('Réplication physique / synthétique','réplication','réplication physique','réplication synthétique','ETF physique','ETF synthétique','ETF à réplication synthétique','ETF à réplication physique');
+add('Autocall (remboursement anticipé automatique)','produit structuré qui s’arrête avant son terme si, à une date d’observation (souvent annuelle), l’indice de référence est au moins à son niveau de départ. Le client reçoit alors son capital et un coupon fixé à l’avance (ex. 8 % × années écoulées). Si le produit n’est jamais rappelé, le capital est remboursé à l’échéance si l’indice est au-dessus de la barrière de protection ; sinon le client supporte la baisse. Le gain est plafonné, la perte ne l’est pas.');
+al('Autocall (remboursement anticipé automatique)','autocall','autocalls','Athéna','produit autocallable','remboursement anticipé automatique');
+add('Phoenix (autocall à coupons conditionnels)','variante de l’autocall avec deux barrières : une barrière de rappel (souvent 100 %) et une barrière de coupon plus basse (souvent 60 à 70 %). Un coupon est versé chaque année où l’indice est au-dessus de la barrière de coupon, même sans rappel. Avec l’effet mémoire, les coupons manqués sont rattrapés plus tard. Coupon généralement plus faible que celui d’un autocall classique.');
+al('Phoenix (autocall à coupons conditionnels)','Phoenix','Phoenix mémoire');
+add('Barrière de rappel et barrière de protection','barrière de rappel : niveau de l’indice (souvent 100 % du départ) à atteindre à une date d’observation pour que le produit s’arrête et paie son coupon. Barrière de protection : niveau (souvent 50 à 70 %) observé à l’échéance, au-dessus duquel le capital est remboursé ; en dessous, le client subit la baisse de l’indice.');
+al('Barrière de rappel et barrière de protection','barrière de rappel','barrière de protection','barrières');
+add('Indice à décrément','indice qui réinvestit les dividendes mais en retire chaque année un montant fixe, en points ou en pourcentage (le décrément). Si les dividendes réels sont inférieurs au décrément, l’indice fait moins bien qu’un indice « dividendes réinvestis ». Les produits structurés s’en servent pour réduire leur coût et proposer un coupon plus élevé ; le client supporte le risque d’une sous-performance de l’indice.');
+al('Indice à décrément','indice à décrément','indices à décrément','à décrément','décrément');
+add('Capitalisation (trois sens)','1) Contrat de capitalisation : placement proche de l’assurance-vie, sans dénouement au décès. 2) Capitalisation des revenus (parts de capitalisation d’un OPCVM, loyers capitalisés d’un contrat) : les revenus sont réinvestis au lieu d’être versés (le contrat ou le fonds peut alors être taxé différemment). 3) Capitalisation boursière : valeur d’une société cotée (cours × nombre d’actions).');
+al('Capitalisation (trois sens)','capitalisation','parts de capitalisation');
+add('Assurance-vie luxembourgeoise','contrat d’assurance-vie souscrit auprès d’un assureur agréé au Luxembourg, souvent en libre prestation de services. Fiscalité française identique à celle d’un contrat français pour un résident français ; sécurité renforcée (triangle de sécurité, super-privilège) ; supports sur mesure (fonds internes dédiés, fonds d’assurance spécialisés). Déclaration annuelle du contrat à l’administration fiscale (formulaire 3916-bis). Voir la fiche Assurance-vie 3.');
+al('Assurance-vie luxembourgeoise','Luxembourg','luxembourgeois','luxembourgeoise','contrat luxembourgeois','assurance-vie luxembourgeoise','contrats luxembourgeois');
+add('Fonds (d’investissement)','véhicule qui rassemble l’argent de plusieurs épargnants pour l’investir ensemble, selon une stratégie fixée (actions, obligations, immobilier, non coté…). Géré par une société de gestion, conservé par un dépositaire, valorisé par une valeur liquidative. Familles : OPCVM, FIA (dont SCPI, FCPR, FPCI), ETF.');
+al('Fonds (d’investissement)','fonds');
+add('Fonds monétaire','fonds qui place l’argent à très court terme (dépôts, titres de créance de moins d’un an) et dont le rendement suit l’€STR ou les taux courts. Très faible risque, mais non garanti ; rendement net des frais ; fiscalité du PFU hors enveloppe. Pas le même objet qu’un livret ou qu’un fonds euros.');
+al('Fonds monétaire','monétaire','monétaires','fonds monétaires','marché monétaire','OPC monétaire');
+add('Fonds daté (obligataire à échéance)','fonds obligataire dont la durée de vie est fixée (ex. 2030) : le gérant achète des obligations qui arrivent à échéance proches de cette date et les garde (portage). À l’échéance, le rendement attendu à l’achat est en principe connu, sauf défaut d’émetteur ; avant, la valeur de part varie avec les taux.');
+al('Fonds daté (obligataire à échéance)','fonds daté','fonds datés','fonds à échéance','obligations datées');
+add('Cœur-satellite (allocation)','approche d’allocation en deux étages : le cœur (ETF larges et peu coûteux, obligations de qualité, fonds euros) forme l’essentiel du portefeuille ; les satellites (thématiques, petites capitalisations, émergents, private equity, titres vifs…) servent à chercher du rendement avec une part limitée et justifiée.');
+al('Cœur-satellite (allocation)','cœur-satellite','cœur et satellites','cœur de portefeuille','ETF cœur','ETF core','satellites','actions satellites');
+add('Eurocroissance','support de l’assurance-vie dont le capital est garanti seulement à l’échéance (au moins 8 ans), à 100 % pour l’eurocroissance au sens strict, ou à un pourcentage fixé au contrat (80 % par exemple). Avant l’échéance, l’épargne est exprimée en parts dont la valeur varie : un rachat se fait à la valeur de la part du jour, sans garantie.');
+al('Eurocroissance','eurocroissance','fonds eurocroissance','fonds croissance','Eurocroissance');
+// --- précisions d’entrées existantes
+const setD=(t,d)=>{const n=NOT.find(r=>r[0]===t);if(n)n[1]=d};
+setD('PPB (provision pour participation aux bénéfices)','cagnotte de réserve de l’assureur sur le fonds en euros. Chaque année, une partie des profits n’est pas versée aux assurés mais mise de côté dans la PPB ; l’assureur doit ensuite la redistribuer dans un délai de 8 ans maximum. Elle sert à lisser le rendement : on y puise pour servir un taux correct les années difficiles. Ordre de grandeur : environ 3,7 % des encours fin 2025 (France Assureurs). Voir la fiche Monétaire et fonds euros.');
+(window.TIPALIAS=window.TIPALIAS||[]).push(...A);
+window.F927.A=A;
+})();
+
+/* ---------- v9.27 : fonds euros, PPB, eurocroissance, duration, indices ---------- */
+(function(){
+const {fi,hi,lk}=window.F927;
+const ins=(f,i,...b)=>f.blocks.splice(i,0,...b);
+const ex=(title,rows)=>({t:'ex',title,text:rows.map(r=>r[0]+' : '+r[1]).join('<br>'),rows:rows.map(r=>({l:r[0],v:r[1]}))});
+// ============ MONÉTAIRE ET FONDS EUROS ============
+(function(){
+const f=fi('monetaire');if(!f)return;
+const blocks=[
+ {t:'h',text:'Comment fonctionne un fonds en euros'},
+ {t:'steps',items:[
+  ['Tu verses','Ta prime rejoint l’actif général de l’assureur : un grand portefeuille commun à tous les clients du fonds, investi pour environ 75 à 80 % en obligations, le reste en immobilier, actions et supports diversifiés (France Assureurs).'],
+  ['L’assureur encaisse les revenus','Coupons, loyers, dividendes et plus-values réalisées. Il retire ses frais de gestion (0,66 % par an en moyenne en 2025, France Assureurs).'],
+  ['Il décide du taux de l’année','Il doit reverser aux assurés une participation minimale aux résultats (article A132-11 du Code des assurances). Il peut verser davantage, ou mettre une partie des profits de côté dans la PPB (voir plus bas).'],
+  ['Le gain est acquis','Le taux est crédité sur ton contrat au 31 décembre. Ce gain ne peut plus être perdu : c’est l’effet cliquet. Le capital est garanti par l’assureur, net de frais de gestion.'],
+  ['Et si l’assureur fait faillite ?','Le fonds de garantie des assurés (FGAP) intervient jusqu’à 70 000 € par assuré et par société d’assurance (voir l’index).']
+ ]},
+ {t:'h',text:'La PPB expliquée simplement'},
+ {t:'ana',title:'La tirelire de lissage',text:'Imagine un boulanger qui vend des gâteaux à des clients fidèles. Les années où il gagne beaucoup, il ne distribue pas tout : il met une partie du surplus dans une <b>tirelire commune</b>. Les années où il gagne peu, il y puise pour que les clients reçoivent quand même un résultat correct. Cette tirelire, dans l’assurance-vie, c’est la <b>PPB</b> (provision pour participation aux bénéfices).'},
+ {t:'list',items:[
+  '<b>Ce que c’est</b> : une réserve que l’assureur constitue sur le fonds euros. Elle appartient collectivement aux assurés du fonds, pas à un contrat en particulier.',
+  '<b>Pourquoi elle existe</b> : lisser les rendements. Les obligations changent de valeur avec les taux, les loyers varient : sans réserve, le taux servi serait plus irrégulier.',
+  '<b>La règle des 8 ans</b> : ce qui est mis dans la PPB doit être redistribué aux assurés dans un délai de 8 ans maximum. L’assureur ne peut pas la garder indéfiniment.',
+  '<b>Comment on la lit</b> : rapportée aux encours, plus la PPB est élevée, plus l’assureur a de marge pour soutenir son taux quand les marchés sont difficiles. Le ratio varie d’un assureur à l’autre : on compare les assureurs entre eux avant de le citer comme argument.'
+ ]},
+ ex('PPB : deux années pour comprendre',[
+  ['Contexte','Un fonds euros de 100 millions d’euros. Année 1, ses placements rapportent 4 % net des frais. Année 2, ils ne rapportent que 1,5 %. Chiffres inventés pour comprendre.'],
+  ['Calcul année 1','Profits : 4 % × 100 M€ = 4 M€. L’assureur sert 3 % aux assurés = 3 M€ et met <b>1 M€ en PPB</b>.'],
+  ['Calcul année 2','Profits : 1,5 % × 100 M€ = 1,5 M€. L’assureur veut servir 2,5 % = 2,5 M€ : il comble l’écart de 1 M€ en <b>puisant dans la PPB</b>.'],
+  ['Résultat','Les assurés ont reçu 3 % puis 2,5 %, alors que les placements ont rapporté 4 % puis 1,5 %. Le taux est lissé.'],
+  ['Lecture','La PPB amortit les chocs, mais elle se vide si les mauvaises années s’enchaînent : elle a baissé de 4,5 % des encours (2023) à 4 % (2024) puis 3,7 % (2025), car les assureurs ont puisé dedans pour tenir leur taux (France Assureurs, via Meilleurtaux).']
+ ]),
+ {t:'h',text:'Historique des rendements'},
+ {t:'svg',name:'fechart'},
+ {t:'table',head:['Repère','Rendement moyen','Source'],rows:[
+  ['2000','5,3 %','LeComparateurAssurance'],
+  ['2021 (point bas)','1,3 %','Eco3min, d’après France Assureurs et ACPR'],
+  ['2022','1,9 %','idem'],
+  ['2023 à 2025 (point haut)','2,6 % chaque année','France Assureurs, ACPR (Meilleurtaux)'],
+  ['Moyenne sur 13 ans','2,1 % par an, contre 1,3 % pour le Livret A et le LDDS','France Assureurs (Meilleurtaux, mars 2026)']
+ ]},
+ {t:'list',items:[
+  '<b>Min, max, moyenne</b> sur les années vérifiées (2021 à 2025) : minimum 1,3 % (2021), maximum 2,6 % (2023 à 2025), moyenne simple de 2,2 %. Sur 13 ans, la moyenne publiée est de 2,1 %.',
+  '<b>Net pour le client</b> : les prélèvements sociaux (17,2 %) s’appliquent chaque année aux gains crédités. 2,6 % brut de prélèvements ≈ <b>2,15 %</b> après prélèvements sociaux, avant impôt sur le revenu éventuel.',
+  '<b>Dispersion</b> : la moyenne cache de grands écarts. En 2025, la moitié des assureurs servait entre 2,3 % et 2,9 %, quelques offres dépassant 4 % (Eco3min, à recouper avec le rapport France Assureurs).',
+  '<b>Pour les années 2001 à 2020</b> : je n’ai pas de série officielle vérifiée ici. Le repère de 2000 à 5,3 % montre simplement que le niveau actuel reste très inférieur à celui de la fin des années 1990.'
+ ]},
+ {t:'h',text:'Rendement réel : pourquoi comparer à l’inflation ?'},
+ {t:'p',text:'Le rendement affiché est <b>nominal</b> : il ne dit pas ce que l’argent permet d’acheter. Le rendement <b>réel</b> retire l’effet de la hausse des prix. Il est négatif quand l’inflation dépasse le taux net ; ce qui compte, c’est de savoir <b>de combien</b>, et sur quelle base on compare.'},
+ ex('Fonds euros à 2,6 % : rendement réel',[
+  ['Contexte','Rendement 2025 du fonds euros moyen : 2,6 %. Après prélèvements sociaux de 17,2 % : 2,6 % × (1 − 0,172) ≈ 2,15 %. Inflation en France : 3,1 % (septembre 2026) ; zone euro : 3,8 %.'],
+  ['Formule','taux réel = (1 + taux net) ÷ (1 + inflation) − 1'],
+  ['Calcul avec l’inflation française','1,0215 ÷ 1,031 − 1 = <b>−0,9 %</b>'],
+  ['Calcul avec la zone euro','1,0215 ÷ 1,038 − 1 = <b>−1,6 %</b>'],
+  ['Résultat','Avec ces chiffres, le pouvoir d’achat baisse d’environ 1 point par an. Le chiffre le plus pertinent pour un client français est l’inflation française.'],
+  ['Lecture','Attention au décalage de dates : le rendement 2025 est confronté à l’inflation de 2026. Le taux 2026 ne sera connu qu’au début de 2027. En 2025, l’inflation était plus basse et la comparaison était plus favorable. Ce calcul donne un ordre de grandeur, pas un constat définitif.']
+ ]),
+ {t:'trap',text:'Dire « rendement réel négatif » sans donner la base. Il faut toujours préciser : quel rendement (brut ou net de prélèvements), quelle inflation (France ou zone euro), quelle période.'}
+];
+ins(f,1,...blocks);
+// lien vers cours-2a
+const q=f.blocks.findIndex(b=>b.t==='pratique');
+})();
+
+// ============ ASSURANCE-VIE 1 : EUROCROISSANCE ============
+(function(){
+const f=fi('av');if(!f)return;
+let i=hi(f,'Pour aller plus loin');if(i<0)i=f.blocks.findIndex(b=>b.t==='trap');
+ins(f,i,
+ {t:'h',text:'Eurocroissance : garanti à l’échéance, pas avant'},
+ {t:'list',items:[
+  '<b>Fonctionnement</b> : un support de l’assurance-vie entre le fonds euros et les UC. L’assureur investit en partie en obligations (pour sécuriser la garantie) et en partie en actifs plus risqués (pour chercher du rendement). L’épargne est exprimée en parts dont la valeur varie.',
+  '<b>La garantie</b> : elle ne vaut qu’à une date fixée à l’avance, au moins 8 ans après le versement, et à un niveau choisi (100 % pour l’eurocroissance au sens strict, parfois 80 %). Net de frais, selon le contrat.',
+  '<b>Avant l’échéance</b> : l’argent n’est pas bloqué. Un rachat se fait à la valeur de la part du jour, sans aucune garantie.'
+ ]},
+ ex('Racheter une part avant l’échéance : deux cas',[
+  ['Contexte','10 000 € versés sur un fonds eurocroissance à 8 ans, garanti à 100 % à l’échéance. Chiffres inventés pour comprendre.'],
+  ['Cas 1 : le client sort en année 3, marchés calmes','La valeur des parts est de 10 380 € : il récupère <b>10 380 €</b>, soit un gain de 380 €.'],
+  ['Cas 2 : le client sort en année 3, après une hausse brutale des taux','Les obligations qui portent la garantie ont baissé : la valeur des parts est de 9 850 €. Il récupère <b>9 850 €</b>, soit une perte de 150 €.'],
+  ['S’il avait attendu l’année 8','Le capital garanti de 10 000 € aurait été restitué à l’échéance (hors défaillance de l’assureur).'],
+  ['Lecture','La perte avant terme est possible, mais elle n’est pas la règle : la valeur de la part reflète des obligations dont le prix converge vers le capital garanti à mesure que l’échéance approche. Je n’ai pas trouvé de statistique officielle sur la fréquence ou l’ampleur des pertes en cas de rachat anticipé : demande à l’assureur l’historique de la valeur de la part du fonds.']
+ ]),
+ {t:'list',items:[
+  '<b>Quand la perte est la plus probable</b> : quand les taux montent vite, comme actuellement, et quand l’échéance est encore loin.',
+  '<b>Réflexe client</b> : n’y mettre que de l’argent dont il n’aura pas besoin avant l’échéance ; lire la notice (niveau de garantie, date, frais) ; comparer l’historique de la valeur de la part.',
+  '<b>Fiscalité</b> : celle de l’assurance-vie. Les prélèvements sociaux ne sont dus qu’au rachat ou à l’échéance, pas chaque année.'
+ ]}
+);
+})();
+
+// ============ OBLIGATIONS : TAUX FRANÇAIS ============
+(function(){
+const f=fi('obligations');if(!f)return;
+const i=hi(f,'Le spread');if(i<0)return;
+ins(f,i,
+ {t:'h',text:'Les taux français à 5 % : ce que ça change'},
+ {t:'p',text:'<b>Le contexte (octobre 2026)</b> :<ul class="k2"><li>L’OAT à 10 ans est montée à <b>5,14 %</b> le 22 octobre 2026, un plus haut depuis 24 ans (Boursorama)</li><li>Elle a pris environ 100 points de base (1 point) depuis le 1ᵉʳ août (Option Finance, 1ᵉʳ octobre)</li><li>L’écart avec le Bund allemand à 10 ans (le <b>spread OAT-Bund</b>) est d’environ <b>157 points de base</b> (Idéal Investisseur, 21 octobre), son plus haut depuis 2011 selon la presse financière</li><li>Les investisseurs s’inquiètent de la dette publique, voisine de 119 % du PIB, d’un déficit attendu au-dessus de 5 %, et de l’incertitude politique avant les élections du printemps 2027</li></ul>'},
+ {t:'h',text:'1. Les obligations que tu détiens déjà'},
+ {t:'list',items:[
+  '<b>Quand les taux montent, le prix des obligations déjà émises baisse</b> : leur coupon est plus faible que celui des nouvelles obligations, donc un acheteur veut un prix plus bas.',
+  '<b>Buy and hold</b> : si tu gardes l’obligation jusqu’à l’échéance, tu récupères le nominal et les coupons promis (hors défaut). La baisse n’est qu’une perte « sur le papier », mais ton argent rapporte moins que les nouvelles obligations.',
+  '<b>Fonds obligataire ouvert</b> : la valeur liquidative baisse vraiment, c’est la sensibilité (duration) qui joue. En contrepartie, le fonds réinvestit ensuite à des taux plus hauts, ce qui améliore son rendement futur.',
+  '<b>Fonds euros</b> : les obligations y sont comptabilisées à leur coût d’achat, donc la hausse des taux ne se voit pas tout de suite. Le rendement monte lentement, au rythme où les anciennes obligations sont remplacées (mécanisme général, à confirmer assureur par assureur).'
+ ]},
+ ex('Une OAT à 3 % achetée avant la hausse',[
+  ['Contexte','Une obligation à 10 ans de nominal 100 € et de coupon 3 % a été achetée au pair, quand les nouveaux emprunts rapportaient 3 %. Aujourd’hui, les nouveaux emprunts à 10 ans rapportent 5,14 %. Hypothèse simplifiée : il reste 10 ans.'],
+  ['Formule','prix = somme des coupons actualisés + nominal actualisé, au taux de marché de 5,14 %'],
+  ['Calcul','3 € de coupon chaque année pendant 10 ans, et 100 € à l’échéance, actualisés à 5,14 % ≈ <b>83,6 €</b>'],
+  ['Résultat','Perte de valeur de marché : (83,6 − 100) ÷ 100 ≈ <b>−16,4 %</b>. L’approximation « duration × variation des taux » donne : 8,2 × 2,14 points ≈ −17,6 %, un peu plus pessimiste que le calcul exact.'],
+  ['Lecture','Gardée jusqu’au terme, elle rendra 100 € plus 3 € par an : la perte reste latente. Mais le client est « bloqué » à 3 % alors que le marché propose 5,14 % : c’est le coût d’opportunité.']
+ ]),
+ {t:'h',text:'2. Les nouvelles obligations : opportunité ou piège ?'},
+ {t:'table',head:['Ce qui plaide pour','Ce qui incite à la prudence'],rows:[
+  ['Un rendement de 5,14 % verrouillé si on garde 10 ans, contre 1,7 % sur le Livret A et 2,6 % en moyenne sur les fonds euros (2025)','Le spread peut encore s’écarter : le risque budgétaire et politique n’est pas réglé, et une OAT peut encore perdre en valeur'],
+  ['Si les taux baissent plus tard, le prix de l’obligation monte (plus-value)','Duration longue = forte volatilité : environ 7,7 pour une OAT à 10 ans qui rapporte 5,14 %'],
+  ['Un revenu régulier et connu, utile à un client qui a besoin de flux','Hors enveloppe, les coupons sont imposés (PFU 31,4 %), ce qui efface en grande partie le gain réel (voir le calcul ci-dessous)']
+ ]},
+ ex('100 € placés en OAT 10 ans à 5,14 %',[
+  ['Contexte','On achète une OAT à 10 ans au pair, avec un coupon de 5,14 %.'],
+  ['Si les taux montent de 1 point (6,14 %)','prix ≈ 92,7 € : <b>−7,3 %</b>'],
+  ['Si les taux baissent de 1 point (4,14 %)','prix ≈ 108,1 € : <b>+8,1 %</b>'],
+  ['Point mort sur un an','Les coupons de 5,14 € compensent une baisse de prix jusqu’à un taux de 5,89 % un an plus tard, soit +0,75 point : au-delà, le rendement de l’année devient négatif.'],
+  ['Rendement réel avant impôt','1,0514 ÷ 1,038 − 1 ≈ <b>+1,3 %</b> avec l’inflation de la zone euro (3,8 %).'],
+  ['Rendement réel après PFU','Coupon net : 5,14 % × (1 − 0,314) ≈ 3,53 % ; 1,0353 ÷ 1,038 − 1 ≈ <b>−0,3 %</b>. Dans une enveloppe fiscale (assurance-vie, PER), l’imposition est différée ou allégée.']
+ ]),
+ {t:'list',items:[
+  '<b>Étaler les achats</b> plutôt qu’acheter en une fois : on ne cherche pas le point haut des taux.',
+  '<b>Choisir la duration</b> : une duration moyenne (3 à 6 ans) réduit la sensibilité par rapport à 10 ans ; une duration longue est un pari sur la baisse des taux.',
+  '<b>Fonds daté</b> : permet de verrouiller un rendement à échéance en déléguant le choix des titres, sans oublier le risque de défaut.',
+  '<b>Vérifier le spread</b> : une OAT peut perdre de la valeur alors que le taux allemand baisse, si l’écart avec le Bund s’élargit.',
+  '<b>Ne pas présenter cela comme un conseil</b> : l’opportunité dépend de l’horizon, de la fiscalité et de la part déjà placée en obligations.'
+ ]}
+);
+})();
+
+// ============ GRAPHIQUES : INDICES ============
+(function(){
+const f=fi('graphiques');if(!f)return;
+let i=f.blocks.findIndex(b=>b.t==='h'&&b.text.indexOf('Tableau de bord')===0);if(i<0)i=f.blocks.length-3;
+ins(f,i,
+ {t:'h',text:'6. Trente ans de grands indices en base 100'},
+ {t:'p',text:'Base 100 à fin 1995 : si on avait investi 100 à cette date, combien auraient valu les 100 fin 2025 ? L’échelle est <b>logarithmique</b> pour que tous les indices restent lisibles.'},
+ {t:'svg',name:'idxchart'},
+ {t:'table',head:['Indice','Fin 2025 (base 100)','Par an','Pire année · baisse max'],rows:[
+  ['S&P 500 (dividendes réinvestis, USD)','1 921','10,4 %','−37,0 % (2008) · −38 %'],
+  ['MSCI World (dividendes réinvestis, USD)','1 172','8,6 %','−40,3 % (2008) · −42 %'],
+  ['CAC 40 (prix)','435','5,0 %','−42,7 % (2008) · −48 %'],
+  ['Euro Stoxx 50 (prix)','384','4,6 %','−44,3 % (2008) · −53 %'],
+  ['Nikkei 225 (prix)','253','3,1 %','−42,1 % (2008) · −57 %']
+ ]},
+ {t:'list',items:[
+  '<b>Lecture</b> : en 30 ans, 100 placés sur le S&P 500 dividendes réinvestis seraient devenus environ 1 921, contre environ 435 pour le CAC 40 en indice de prix.',
+  '<b>Attention aux unités</b> : les deux premières courbes réinvestissent les dividendes et sont en dollars ; les trois autres sont des indices de prix en monnaie locale. Sans dividendes, le CAC 40, l’Euro Stoxx 50 et le Nikkei sont <b>sous-estimés</b> par rapport aux deux autres. La comparaison est indicative.',
+  '<b>Pire année et baisse maximale</b> : calculées sur des clôtures annuelles. La baisse maximale mesure la perte entre un plus haut de fin d’année et le plus bas de fin d’année suivant. Les baisses en cours d’année sont plus fortes.',
+  '<b>Ce que ça montre</b> : 2000-2002 et 2008 ont touché tous les indices ; l’écart entre les courbes se creuse sur les 15 dernières années, avec une avance américaine.'
+ ]},
+ {t:'trap',text:'Annoncer à un client « le CAC 40 a fait 5 % par an » sans préciser qu’il s’agit d’un indice <b>hors dividendes</b> et sans les frais. Le rendement d’un placement réel dépend aussi des frais et de la fiscalité.'}
+);
+})();
+})();
+
+/* ---------- v9.27 : cours intensif (fonctionnement, avantages/inconvénients), structurés simplifiés ---------- */
+(function(){
+const {fi,hi,lk}=window.F927;
+const ins=(f,i,...b)=>f.blocks.splice(i,0,...b);
+const pc=rows=>({t:'table',head:['Avantages','Inconvénients'],rows});
+const fonct=txt=>({t:'list',items:['<b>Fonctionnement</b> : '+txt]});
+const links=(...a)=>({t:'p',text:'<span class="prog">Pour aller plus loin : '+a.map(x=>lk(x[0],x[1])).join(' · ')+'</span>'});
+const secEnd=(f,start)=>{let j=start+1;while(j<f.blocks.length&&f.blocks[j].t!=='h'&&f.blocks[j].t!=='flash'&&f.blocks[j].t!=='pratique')j++;return j};
+// ajoute (fonctionnement) + avantages/inconvénients + liens à la section dont le titre commence par t
+const section=(f,t,o)=>{
+  let s=hi(f,t);if(s<0){console.warn('section absente',f.id,t);return}
+  if(o.fonct)ins(f,s+1,fonct(o.fonct));
+  const e=secEnd(f,s+(o.fonct?1:0));
+  const add=[pc(o.pc)];if(o.links)add.push(links(...o.links));
+  ins(f,e,...add);
+};
+// ============ COURS 2A ============
+(function(){
+const f=fi('cours-2a');if(!f)return;
+// fonds euros : réécriture
+let s=hi(f,'Fonds euros');
+if(s>=0){
+ f.blocks[s+1]={t:'list',items:[
+  '<b>Fonctionnement</b> : tu verses, l’assureur investit dans son actif général (75 à 80 % d’obligations, le reste en immobilier, actions, diversifiés), prélève ses frais, puis annonce chaque année un taux crédité sur ton contrat. Ce gain est acquis (effet cliquet) et le capital est garanti, net de frais de gestion.',
+  '<b>Rendement</b> : 2,6 % en moyenne en 2025 (servi début 2026, France Assureurs ; 2,65 % selon l’ACPR), pour la troisième année de suite. Historique 2021 à 2025 : 1,3 %, 1,9 %, 2,6 %, 2,6 %, 2,6 %. Les meilleurs contrats dépassent 4 %, souvent sous condition de part en UC. Prélèvements sociaux de 17,2 % chaque année.',
+  '<b>PPB</b> (provision pour participation aux bénéfices) : tirelire commune où l’assureur met une partie des profits les bonnes années, pour servir un taux correct les mauvaises. Il doit la redistribuer sous 8 ans. Elle vaut ≈ <b>3,7 % des encours</b> fin 2025 (France Assureurs), contre 4 % en 2024 et 4,5 % en 2023 : les assureurs puisent dedans pour tenir les taux.',
+  '<b>Contraintes</b> :<ul class="k2"><li>Frais de gestion de 0,66 % par an en moyenne (2025, France Assureurs), déjà déduits du taux affiché</li><li>Bonus parfois conditionné à une part d’UC</li><li>Loi Sapin 2 (blocage temporaire possible des rachats en cas de crise)</li><li>Pouvoir d’achat : 2,6 % brut ≈ 2,15 % après prélèvements sociaux, contre 3,1 % d’inflation en France (septembre 2026) : environ −0,9 point par an. Ordre de grandeur, calcul détaillé dans la fiche Monétaire et fonds euros</li></ul>']};
+ const e=secEnd(f,s+1);
+ ins(f,e,pc([
+  ['Capital garanti par l’assureur (net de frais)','Rendement de 2,6 % en 2025, souvent sous l’inflation après prélèvements sociaux'],
+  ['Gains acquis chaque année (cliquet)','Bonus conditionnés à des UC ; frais de gestion de 0,66 %'],
+  ['Disponible : rachat possible à tout moment','Blocage possible des rachats (Sapin 2) en cas de crise'],
+  ['Fiscalité de l’assurance-vie','Au-delà de 70 000 €, dépend de la solidité de l’assureur (garantie FGAP plafonnée)']
+ ]),links(['monetaire','Monétaire et fonds euros (PPB, historique)'],['av','Assurance-vie 1']));
+}
+// eurocroissance
+s=hi(f,'Eurocroissance');
+if(s>=0){
+ const l=f.blocks[s+1];
+ if(l&&l.items){l.items=l.items.map(x=>x.indexOf('<b>Avant l’échéance</b>')===0?'<b>Avant l’échéance</b> : l’argent n’est pas bloqué, mais il n’y a aucune garantie ; on récupère la valeur des parts du jour. Exemple : 10 000 € versés ; si les parts valent 9 850 € au moment du rachat, on récupère 9 850 €, alors que la garantie de 10 000 € ne vaut qu’à l’échéance. La perte est possible, surtout quand les taux montent vite (voir l’exemple chiffré dans la fiche Assurance-vie 1).':x)}
+ const e=secEnd(f,s+1);
+ ins(f,e,pc([
+  ['Garantie du capital à l’échéance (80 à 100 % selon le fonds)','Aucune garantie avant l’échéance : rachat à la valeur des parts du jour'],
+  ['Potentiel de rendement supérieur au fonds euros','Horizon d’au moins 8 ans ; peu de contrats le proposent'],
+  ['Fiscalité de l’assurance-vie','Peu d’historique ; garantie parfois partielle, confondue avec 100 %']
+ ]),links(['av','Assurance-vie 1 : eurocroissance et rachat avant l’échéance']));
+}
+// UC
+section(f,'Unités de compte',{fonct:'une unité de compte est une part d’un fonds (OPCVM, ETF, SCPI…) logée dans le contrat. Tu achètes des parts au prix du jour (valeur liquidative). L’assureur ne garantit pas leur valeur, seulement leur nombre. Tu choisis tes supports (gestion libre) ou tu délègues (gestion pilotée). Les arbitrages entre supports ne déclenchent pas d’impôt dans le contrat.',
+ pc:[['Accès aux marchés mondiaux, potentiel supérieur au fonds euros (4,7 % nets en 2025 en moyenne, ACPR)','Perte en capital possible'],['ETF peu coûteux (≈ 0,3 % de frais internes)','Frais cumulés : ≈ 2,5 % par an en moyenne (0,88 % de contrat + 1,60 % de fonds)'],['Arbitrages sans impôt dans le contrat','Choix limité au catalogue du contrat ; valorisation parfois différée']],
+ links:[['fonds','Fonds, ETF et frais'],['opcvm','OPCVM : SICAV, FCP'],['av','Assurance-vie 1']]});
+// titres vifs
+section(f,'Titres vifs',{fonct:'tu achètes directement des actions (ou des obligations) via un compte-titres, un PEA ou un contrat à titres vifs. Les ordres sont exécutés en Bourse au prix de marché. Dividendes et coupons arrivent sur ton compte, les titres étant gardés chez un dépositaire.',
+ pc:[['Choix précis des entreprises ; pas de frais de gestion de fonds','Risque spécifique : une seule entreprise peut perdre beaucoup'],['Dividendes perçus directement','Diversification difficile avec un petit capital'],['Éligibles au PEA pour les actions européennes','Suivi régulier ; courtage ; impôt à chaque cession hors enveloppe']],
+ links:[['actions','Actions'],['pea','PEA et PEA-PME']]});
+// obligations
+s=hi(f,'Obligations et fonds obligataires');
+if(s>=0){
+ const l=f.blocks[s+1];
+ if(l&&l.items&&l.items[0]){l.items[0]='<b>Duration</b> : sensibilité au taux. Duration 5 : −5 % si les taux montent de 1 point. Contexte : OAT à 10 ans ≈ 5,1 % au 22 octobre 2026 (5,14 %), spread OAT-Bund ≈ 157 points de base, inflation 3,8 % en zone euro.'}
+}
+section(f,'Obligations et fonds obligataires',{fonct:'l’emprunteur (État ou entreprise) reçoit ton argent. Il verse un coupon chaque année, puis rembourse le nominal à l’échéance. Tu peux revendre avant au prix de marché, qui varie en sens inverse des taux. En fonds obligataire, un gérant détient un panier d’obligations.',
+ pc:[['Revenu régulier ; rendement connu si l’on garde jusqu’à l’échéance (hors défaut)','Risque de taux : le prix baisse quand les taux montent (duration)'],['Rendements actuellement élevés (OAT à 10 ans ≈ 5,1 %)','Risque de défaut de l’émetteur, plus fort en haut rendement'],['Diversifie un portefeuille d’actions','Coupons fixes rognés par l’inflation ; liquidité variable selon les lignes']],
+ links:[['obligations','Obligations (taux français à 5 %, duration)'],['macro','Macro : BCE, inflation et taux']]});
+// monétaire
+s=hi(f,'Monétaire');
+if(s>=0){const l=f.blocks[s+1];if(l&&l.items){l.items=l.items.map(x=>x.indexOf('On ne le garde pas des années')===0?'On ne le garde pas des années : taux réel ≈ −1,3 point aujourd’hui (taux de dépôt BCE de 2,50 % contre 3,8 % d’inflation en zone euro, avant impôt).':x)}}
+section(f,'Monétaire',{fonct:'un fonds monétaire place l’argent à très court terme (dépôts, titres de moins d’un an). La valeur de la part suit le taux court (€STR). Retrait en quelques jours. Ce n’est ni un livret (réglementé) ni un fonds euros (capital garanti).',
+ pc:[['Risque très faible ; liquidité en quelques jours','Pas de garantie du capital'],['Rendement qui suit les taux courts','Rendement net souvent inférieur à l’inflation'],['Pratique pour attendre une décision ou un décaissement','Fiscalité du PFU hors enveloppe']],
+ links:[['monetaire','Monétaire et fonds euros'],['cat','Compte à terme']]});
+// or
+section(f,'Or et matières premières',{fonct:'l’or ne verse aucun revenu : le gain vient seulement de la variation de son cours (en dollars). On y accède par des pièces ou lingots, un ETC adossé à l’or, ou des fonds de mines d’or (qui sont des actions, au comportement différent).',
+ pc:[['Diversification : corrélation faible avec les actions','Aucun revenu ; forte volatilité (correction de 15 à 27 % début 2026)'],['Protège dans certaines crises de confiance','Fiscalité de l’or physique spécifique ; ETC non éligible au PEA']],
+ links:[['alloc','Allocation d’actifs']]});
+})();
+// ============ COURS 2B ============
+(function(){
+const f=fi('cours-2b');if(!f)return;
+section(f,'SCPI et OPCI',{fonct:'la SCPI collecte l’argent de nombreux épargnants et achète des immeubles (bureaux, commerces, santé…) loués à des entreprises. Elle reverse les loyers nets de frais aux associés, en général chaque trimestre. Tu détiens des parts, valorisées par la société de gestion sur la base d’expertises. L’OPCI ajoute une poche financière, ce qui améliore la liquidité.',
+ pc:[['Revenus réguliers ; gestion déléguée ; mutualisation sur de nombreux locataires','Frais d’entrée de 8 à 12 % ; prix des parts variable (−3,45 % en moyenne en 2025)'],['Accès à l’immobilier avec un capital limité','Liquidité faible : files d’attente de retrait'],['Dans l’assurance-vie : loyers capitalisés sans impôt annuel','En direct : revenus fonciers à la TMI + prélèvements sociaux ; parts dans l’IFI']],
+ links:[['scpi','SCPI : fonctionnement et fiscalité'],['immo','Immobilier']]});
+section(f,'Private equity',{fonct:'un fonds (FCPR, FPCI, ELTIF) collecte les engagements des investisseurs, appelle l’argent progressivement, investit dans des entreprises non cotées, puis les revend et redistribue le produit. Le tout dure 8 à 12 ans pour un fonds fermé.',
+ pc:[['Rendement attendu élevé (10,2 % net chez J.P. Morgan)','Argent bloqué 8 à 12 ans ; perte en capital possible'],['Diversifie par rapport aux marchés cotés','Frais élevés (plus de 2 % par an + intéressement du gérant)'],['Avantages fiscaux possibles (FCPR, IR-PME)','Dispersion très forte entre gérants ; valorisation retardée']],
+ links:[['pe','Private equity et capital-risque'],['fcpi','FCPI, FIP, FCPR']]});
+// structurés : refonte simple
+let i=hi(f,'Produits structurés');
+if(i>=0){
+ let j=i+1;while(j<f.blocks.length&&f.blocks[j].t!=='h')j++;
+ f.blocks.splice(i,j-i,
+  {t:'h',text:'Produits structurés : savoir les expliquer simplement'},
+  {t:'ana',title:'Un rendez-vous annuel avec un jury',text:'Une fois par an, le jury regarde l’indice (par exemple le CAC 40). <b>Si l’indice est au moins à son niveau de départ</b>, le jury te rend ton capital avec une prime fixée d’avance (par exemple 8 % par année écoulée) et le contrat s’arrête. <b>Sinon</b>, on se revoit un an plus tard. À la dernière date, si l’indice a perdu plus que la limite (par exemple plus de 40 %), tu supportes la baisse.'},
+  {t:'svg',name:'acschema'},
+  {t:'p',text:'<b>Le montage en deux mots</b> : la banque place l’essentiel de ton argent dans une obligation (une dette de la banque), et utilise le reste pour acheter une option sur l’indice. Ton résultat dépend d’un scénario écrit à l’avance.'},
+  {t:'h',text:'Simulation sur six ans : autocall et Phoenix'},
+  {t:'p',text:'Hypothèses d’<b>exemple</b> : indice de départ à 100 ; autocall à 8 % par année écoulée ; Phoenix à 6 % par an, avec une barrière de coupon à 60 % ; barrière de rappel à 100 % ; barrière de protection à 60 % à l’échéance ; durée maximale de six ans.'},
+  {t:'svg',name:'acpaths'},
+  {t:'table',head:['Scénario','Autocall à 8 %','Phoenix à 6 %'],rows:[
+   ['<b>A</b> : indice à 105 % à la fin de l’année 1 (indice seul : 105 %)','Rappel an 1 : <b>108 %</b>','Rappel an 1 : <b>106 %</b>'],
+   ['<b>B</b> : 90, 95, puis 102 % (indice seul : 102 %)','Rappel an 3 : 3 × 8 % = <b>124 %</b>','Rappel an 3 : 3 × 6 % = <b>118 %</b>'],
+   ['<b>D</b> : entre 65 et 90 %, jamais rappelé (indice seul : 70 %)','Capital rendu, aucun coupon : <b>100 %</b>','6 coupons de 6 % + capital : <b>136 %</b>'],
+   ['<b>C</b> : 85, 70, 65, 75, 80 puis 55 % (indice seul : 55 %)','Perte de 45 % : <b>55 %</b>','5 coupons (30 %) + 55 % de capital : <b>85 %</b>']
+  ]},
+  {t:'p',text:'<b>Lecture</b> : le produit ne bat pas l’indice dans tous les cas. Il gagne quand l’indice monte peu (A, B), ne perd rien quand l’indice baisse un peu (D), et perd autant que l’indice quand celui-ci passe sous la barrière de protection (C). Dans le scénario A, un client qui aurait détenu l’indice aurait gagné 5 % mais le produit paie 8 % ; si l’indice avait fait +30 %, le produit paierait toujours 108 %, c’est le gain plafonné.'},
+  {t:'h',text:'Autocall ou Phoenix : lequel choisir ?'},
+  {t:'table',head:['','Autocall (type Athéna)','Phoenix'],rows:[
+   ['Principe','Un seul test chaque année : l’indice est-il à 100 % ou plus ?','Deux tests : rappel (100 % ou plus) et coupon (au-dessus d’une barrière plus basse)'],
+   ['Quand le coupon est-il versé ?','Seulement au rappel (le coupon est alors cumulé)','Chaque année où l’indice est au-dessus de la barrière de coupon, même sans rappel ; avec « mémoire », les coupons manqués sont rattrapés'],
+   ['Niveau du coupon','En général plus élevé','En général plus faible, pour une barrière de protection comparable'],
+   ['Avantages','Simple à expliquer ; coupon élevé ; sortie rapide si l’indice monte','Revenus réguliers même si l’indice stagne ou baisse un peu ; touche des coupons pendant des années'],
+   ['Inconvénients','Rien tant qu’il n’y a pas de rappel ; perte sèche si l’indice finit sous la barrière','Plus complexe ; coupon plus faible ; la perte finale est identique sous la barrière de protection'],
+   ['Plutôt choisir si…','Le client anticipe un marché stable ou en hausse, accepte de ne rien toucher entre-temps et vise un gain plus élevé','Le client veut des revenus réguliers, anticipe un marché plutôt latéral, et accepte un coupon plus modeste']
+  ]},
+  {t:'h',text:'Il existe d’autres variantes'},
+  {t:'list',items:[
+   '<b>Capital garanti à participation</b> : le capital est rendu à l’échéance, quoi qu’il arrive, et le client reçoit une fraction de la hausse de l’indice. Le prix de la garantie est une participation inférieure à 100 % et un capital bloqué.',
+   '<b>Reverse convertible</b> : coupon fixe élevé, mais si le sous-jacent termine sous un niveau donné, le client subit la baisse.',
+   '<b>Autocall dégressif</b> (step-down) : la barrière de rappel baisse au fil du temps (par exemple 100 %, 95 %, 90 %…), ce qui rend le rappel plus probable.',
+   '<b>Airbag</b> : si la barrière est franchie, la perte est amortie, calculée par rapport à la barrière (voir l’index).',
+   '<b>Twin-win</b> : le client gagne si l’indice monte, et aussi s’il baisse modérément (sous réserve de ne pas franchir la barrière).',
+   '<b>Les noms varient selon les banques</b> : seule la brochure fait foi.'
+  ]},
+  {t:'h',text:'Ce qu’il faut dire au client'},
+  {t:'list',items:[
+   '<b>Le risque émetteur</b> : si la banque fait faillite (Lehman, 2008), le produit peut valoir zéro, quelle que soit la performance de l’indice.',
+   '<b>Perte en capital</b> sous la barrière de protection, jamais plafonnée ; gain plafonné.',
+   '<b>Liquidité</b> : avant l’échéance, on vend au prix de marché, qui peut être inférieur au capital.',
+   '<b>Coûts intégrés dans le prix</b> : un guide professionnel cite 1 à 3 % de structuration et 1 à 3 % de rétrocession au distributeur ; à demander. Les indices à décrément réduisent le niveau de référence.',
+   '<b>Les dividendes</b> de l’indice ne reviennent pas au client, sauf indice dividendes réinvestis.'
+  ]},
+  pc([
+   ['Scénario connu à l’avance ; coupon fixé d’avance','Gain plafonné, perte en capital possible sous la barrière'],
+   ['Coupon élevé si l’indice reste stable ou monte','Risque de l’émetteur (la banque)'],
+   ['Protection partielle jusqu’à la barrière ; sortie anticipée automatique possible','Liquidité faible avant terme ; complexité ; coûts intégrés']
+  ]),
+  links(['structures','Produits structurés (simulateur, term sheet)'])
+ );
+}
+})();
+// ============ COURS 3 ============
+(function(){
+const f=fi('cours-3');if(!f)return;
+section(f,'Assurance-vie',{fonct:'tu verses des primes, l’assureur les place sur les supports que tu choisis (fonds euros, unités de compte, eurocroissance). Tu peux retirer à tout moment (rachat) : seule la part de gains est taxée. Au décès, les capitaux vont aux bénéficiaires désignés dans la clause, hors succession dans la limite des abattements.',
+ pc:[['Fiscalité allégée après 8 ans (abattement de 4 600 € / 9 200 €, 7,5 %)','Frais de contrat (0,88 % sur les UC) ; rachat avant 8 ans taxé à 12,8 %'],['Transmission hors succession : 152 500 € par bénéficiaire (primes avant 70 ans)','Primes après 70 ans : abattement global de 30 500 € seulement'],['Choix des supports, clause bénéficiaire sur mesure, disponibilité','Dépend de la solidité de l’assureur ; blocage possible des rachats (Sapin 2)']],
+ links:[['av','Assurance-vie 1'],['av-beton','Assurance-vie 2']]});
+section(f,'Contrat de capitalisation',{fonct:'même mécanique que l’assurance-vie (primes, supports, rachats), mais sans bénéficiaire désigné : le contrat reste dans le patrimoine et se transmet avec lui, avec son ancienneté.',
+ pc:[['Transmissible ou donnable du vivant, en conservant l’antériorité fiscale','Pas d’avantage fiscal au décès : entre dans la succession'],['Utilisable par une société (trésorerie de holding)','Pour une personne morale à l’IS : imposition annuelle sur une base forfaitaire'],['Mêmes supports que l’assurance-vie','Moins connu des clients ; clause bénéficiaire inexistante']],
+ links:[['capi','Contrat de capitalisation']]});
+section(f,'Contrat luxembourgeois',{fonct:'le contrat est souscrit auprès d’un assureur luxembourgeois, qui dépose les actifs chez une banque dépositaire distincte. Les mécanismes sont ceux de l’assurance-vie (primes, rachats, clause bénéficiaire) avec des supports plus larges : fonds internes dédiés, fonds d’assurance spécialisés, titres vifs.',
+ pc:[['Triangle de sécurité et super-privilège ; pas de plafond de 70 000 €','Tickets d’entrée élevés (50 000 à 250 000 € le plus souvent)'],['Supports sur mesure, multidevises, mobilité internationale','Déclaration annuelle du contrat (3916-bis) ; complexité'],['Fiscalité française identique pour un résident','Le PLF 2027 (article 6, non voté) viserait les fonds dédiés contenant des actifs du souscripteur']],
+ links:[['avlux','Assurance-vie 3 : France ou Luxembourg'],['budget2027','Budget 2027']]});
+section(f,'PER',{fonct:'tu verses pendant ta vie active (le versement est déductible ou non, à ton choix), l’argent est investi sur des supports et reste bloqué jusqu’à la retraite, sauf cas de déblocage. À la sortie : capital, rente ou mixte, imposé selon l’option choisie à l’entrée.',
+ pc:[['Économie d’impôt à l’entrée = versement × TMI (si déduction)','Argent bloqué jusqu’à la retraite (cas de déblocage limités)'],['Sortie en capital ou en rente, au choix','Imposition à la sortie ; intérêt faible si TMI basse ou plus haute à la retraite']],
+ links:[['per','Plan d’épargne retraite']]});
+section(f,'PEA et PEA-PME',{fonct:'le PEA associe un compte espèces et un compte-titres. Tu verses dans la limite du plafond, puis tu achètes des titres éligibles. Tant que tu ne retires pas, aucun impôt sur les gains. Après 5 ans, retrait sans clôture et sans impôt sur le revenu.',
+ pc:[['Après 5 ans : 0 % d’impôt sur le revenu (prélèvements sociaux dus)','Plafond de versements : 150 000 € (PEA) et 225 000 € cumulés avec le PEA-PME'],['Retraits partiels libres après 5 ans','Retrait avant 5 ans = clôture (sauf cas dérogatoires)'],['ETF et actions européennes accessibles','Univers limité aux titres de l’UE et de l’EEE']],
+ links:[['pea','PEA et PEA-PME']]});
+section(f,'Compte-titres',{fonct:'le compte est ouvert chez une banque ou un courtier. Tu achètes et vends ce que tu veux. Chaque cession et chaque dividende est imposé l’année même, via l’imprimé fiscal unique.',
+ pc:[['Aucun plafond, aucun blocage, tous les marchés du monde','Pas d’avantage fiscal : PFU de 31,4 % dès la première cession'],['Moins-values imputables sur 10 ans','Déclaration des dividendes et des cessions, y compris étrangers'],['Simple et liquide','Aucune protection fiscale pour une transmission']],
+ links:[['cto','Compte-titres ordinaire']]});
+})();
+})();
+
+/* ---------- v9.27 : budget 2027 (22 octobre), remplacements, CHECK, quiz, liens, typographie ---------- */
+(function(){
+const {fi,lk}=window.F927;
+// ---- budget 2027 : mise à jour au 22 octobre 2026
+(function(){
+const f=fi('budget2027');if(!f)return;
+const sub=(o,n)=>{(function w(x){if(Array.isArray(x)){x.forEach((v,i)=>{if(typeof v==='string'){if(v.indexOf(o)>=0)x[i]=v.split(o).join(n)}else w(v)})}else if(x&&typeof x==='object'){Object.keys(x).forEach(k=>{const v=x[k];if(typeof v==='string'){if(v.indexOf(o)>=0)x[k]=v.split(o).join(n)}else w(v)})}})(f.blocks)};
+sub('État des lieux au 20 octobre 2026</b> (sources consultées le 21 octobre 2026)','État des lieux au 22 octobre 2026</b> (sources consultées les 21 et 22 octobre 2026)');
+sub('Statut au 20 octobre','Statut au 22 octobre');
+sub('Pas encore examiné.</td>','Pas encore examiné.</td>');
+// calendrier
+const cal=f.blocks.find(b=>b.t==='table'&&b.head&&b.head[0]==='Date');
+if(cal){
+ cal.rows=cal.rows.map(r=>r[0]==='À partir du 27 octobre'?['27 octobre au 2 novembre','Reprise de l’examen de la première partie (recettes) en séance, selon le calendrier de l’Assemblée nationale.']:r);
+ const k=cal.rows.findIndex(r=>r[0]==='27 octobre au 2 novembre');
+ cal.rows.splice(k+1,0,['3 novembre (après-midi)','Vote solennel sur la première partie inscrit à l’ordre du jour de l’Assemblée nationale. La presse (Cryptoast) avance d’autres dates pour la suite : on retient le calendrier officiel et on le revérifie.']);
+}
+// apport-cession
+const mt=f.blocks.find(b=>b.t==='table'&&b.head&&b.head[0]==='Mesure');
+if(mt){
+ mt.rows=mt.rows.map(r=>{
+  if(r[0].indexOf('Apport-cession')>=0)r[2]='Adopté en séance publique par 25 voix contre 23, dans une version remaniée (provisoire). Le ministre s’est engagé à retravailler le dispositif pendant la navette (FiscalOnline, 19 octobre ; Cryptoast).';
+  return r;
+ });
+ const pk=mt.rows.findIndex(r=>r[0].indexOf('IR-PME')>=0);
+ mt.rows.splice(pk+1,0,['<b>PFU (flat tax)</b>','Les amendements relevant le taux du PFU ont été rejetés en séance (29 voix pour, 66 contre selon Cryptoast).','Rejeté en séance (provisoire) ; source de presse à recouper avec le compte rendu de l’Assemblée.']);
+}
+// sources
+const last=f.blocks[f.blocks.length-1];
+if(last&&last.t==='p'&&last.text.indexOf('Sources, consultées le 21 octobre 2026')>=0){
+ last.text=last.text.replace('Sources, consultées le 21 octobre 2026','Sources, consultées les 21 et 22 octobre 2026').replace('</span>',' · <a href="https://www.assemblee-nationale.fr/dyn/actualites-accueil-hub/examen-du-projet-de-loi-de-finances-pour-2027" target="_blank" rel="noopener noreferrer">Assemblée nationale, calendrier d’examen</a> · <a href="https://fiscalonline.com/outils-fiscaux/plf-2027-reforme-minima-apport-cession-applicable-apports-anciens" target="_blank" rel="noopener noreferrer">FiscalOnline, apport-cession</a> · <a href="https://cryptoast.fr/plf-2027/" target="_blank" rel="noopener noreferrer">Cryptoast, suivi du PLF 2027</a> · <a href="https://www.lecourrierdesstrateges.fr/budget-2027-particuliers-et-pme-ce-qui-a-ete-vote-et-ce-qui-reste-en-suspens/" target="_blank" rel="noopener noreferrer">Le Courrier des stratèges</a></span>');
+}
+})();
+// ---- remplacements transversaux (chiffres de marché)
+const REP=[
+ ['OAT à 10 ans ≈ 4,8 à 4,9 % au 1ᵉʳ octobre 2026, Bund ≈ 3,6 %, inflation 3,8 %.','OAT à 10 ans ≈ 5,1 % au 22 octobre 2026 (5,14 %), spread OAT-Bund ≈ 157 points de base, inflation 3,8 % en zone euro.'],
+ ['OAT 10 ans ≈ 4,8 à 4,9 % ; Bund ≈ 3,6 %','OAT 10 ans ≈ 5,1 % (22 octobre 2026) ; spread OAT-Bund ≈ 157 pb']
+];
+(function w(x){
+  if(Array.isArray(x)){x.forEach((v,i)=>{if(typeof v==='string'){let s=v;REP.forEach(([o,n])=>{if(s.indexOf(o)>=0)s=s.split(o).join(n)});x[i]=s}else w(v)})}
+  else if(x&&typeof x==='object'){Object.keys(x).forEach(k=>{const v=x[k];if(typeof v==='string'){let s=v;REP.forEach(([o,n])=>{if(s.indexOf(o)>=0)s=s.split(o).join(n)});x[k]=s}else w(v)})}
+})([F,NOT,QZ]);
+// ---- liens « fiche « X » » vers les fiches (nouvelle fenêtre)
+const nz=s=>s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,"'").replace(/\s+/g,' ').trim();
+const byTitle=F.map(x=>[nz(x.title),x.id]);
+const RXF=/\b(fiche|fiches)\s+(«[\s ]?)([^»<]{3,70}?)([\s ]?»)/g;
+const linkF=s=>{
+  if(s.indexOf('»')<0)return s;
+  return s.replace(RXF,(m,a,b,t,c,off)=>{
+    const before=s.slice(Math.max(0,off-80),off);
+    if(/<a [^>]*$/.test(before)||/href="#\//.test(before.slice(-40)))return m;
+    const k=nz(t);const hit=byTitle.find(([n])=>n===k)||byTitle.find(([n])=>n.indexOf(k)===0);
+    if(!hit)return m;
+    return a+' '+b+lk(hit[1],t)+c;
+  });
+};
+(function w(x){
+  if(Array.isArray(x)){x.forEach((v,i)=>{if(typeof v==='string')x[i]=linkF(v);else w(v)})}
+  else if(x&&typeof x==='object'){Object.keys(x).forEach(k=>{const v=x[k];if(typeof v==='string'&&(k==='text'||k==='v'||k==='def'||k==='a'))x[k]=linkF(v);else if(typeof v==='string'){}else w(v)})}
+})(F.map(x=>x.blocks));
+// ---- à revérifier
+const A=(id,arr)=>{CHECK[id]=(CHECK[id]||[]).concat(arr)};
+A('monetaire',[
+ 'Rendements du fonds euros : seules les années 2021 à 2025 sont reprises (1,3 ; 1,9 ; 2,6 ; 2,6 ; 2,6 %), d’après France Assureurs/ACPR relayés par Meilleurtaux et Eco3min ; 2000 (5,3 %) vient de LeComparateurAssurance. Les années 2001 à 2020 ne sont pas reprises faute de série officielle vérifiée : à compléter depuis le rapport annuel de France Assureurs ou l’ACPR.',
+ 'Moyenne de 2,1 % « sur 13 ans » : annoncée par Meilleurtaux (France Assureurs, mars 2026) sans préciser la première année.',
+ 'Dispersion 2025 (moitié des assureurs entre 2,3 et 2,9 %, offres au-dessus de 4 %) : Eco3min, à recouper avec le rapport de France Assureurs.',
+ 'Rendement réel : la comparaison confronte le rendement 2025 (servi début 2026) à l’inflation de septembre 2026 (France 3,1 %, zone euro 3,8 %). C’est un ordre de grandeur, le taux 2026 n’étant pas connu.',
+ 'Exemple de la PPB : chiffres inventés pour comprendre, non représentatifs d’un assureur.'
+]);
+A('av',['Eurocroissance : l’exemple de rachat anticipé (10 000 € devenant 9 850 €) est inventé. Aucune statistique officielle trouvée sur la fréquence des pertes en cas de rachat avant l’échéance ; la convergence de la valeur de part vers le capital garanti est un mécanisme général, à vérifier dans la notice de chaque fonds.']);
+A('obligations',[
+ 'OAT 10 ans à 5,14 % le 22 octobre 2026 (titre d’un article Boursorama du 22 octobre à 12 h 08, texte non consulté en entier) ; spread de 157,5 pb au 21 octobre (Idéal Investisseur) ; +100 pb depuis le 1ᵉʳ août et dette ≈ 119 % du PIB (Option Finance, 1ᵉʳ octobre). À relever à nouveau le jour de l’entretien.',
+ 'Fonds euros et hausse des taux (obligations au coût d’achat, remontée progressive des rendements) : mécanisme général de comptabilité des assureurs, non sourcé ici.',
+ 'Calculs de prix d’obligation : formule actuarielle exacte, hypothèse d’une échéance à 10 ans exactement et d’un coupon annuel.'
+]);
+A('graphiques',['Séries des indices : rendements annuels du S&P 500 et du MSCI World (dividendes réinvestis, USD) et clôtures annuelles du CAC 40, de l’Euro Stoxx 50 et du Nikkei 225 relevés sur Wikipédia ; à recouper avec S&P Dow Jones Indices, MSCI et Euronext. Les trois derniers sont des indices de prix, donc non comparables en rigueur aux deux premiers.']);
+A('cours-2b',['Variantes de produits structurés (dégressif, airbag, twin-win, reverse convertible) : noms et paramètres variables d’un émetteur à l’autre. Simulation de six ans : hypothèses d’exemple (8 % autocall, 6 % Phoenix, barrières à 100 %, 60 % et 60 %), non issues d’un produit réel.','Taux de distribution 2025 des SCPI : 4,92 % dans ce bloc, 4,91 % dans la fiche SCPI (ASPIM) : à uniformiser après relecture du rapport ASPIM.']);
+A('budget2027',['Mises à jour du 22 octobre : calendrier d’examen (vote solennel de la première partie le 3 novembre) tiré du site de l’Assemblée nationale ; adoption de l’article 5 (apport-cession, 25 voix contre 23) tirée de FiscalOnline et Cryptoast, à recouper avec le compte rendu officiel ; rejet des hausses de PFU issu de Cryptoast uniquement.']);
+// ---- quiz
+QZ.push(
+{q:'Que doit faire l’assureur de la provision pour participation aux bénéfices (PPB) ?',o:['La redistribuer aux assurés dans un délai de 8 ans maximum','La garder indéfiniment comme fonds propres','La reverser à l’État','La distribuer aux actionnaires de l’assureur'],w:'La PPB est une réserve collective de lissage : l’assureur doit la redistribuer aux assurés du fonds dans un délai de 8 ans au plus.'},
+{q:'Quel rendement moyen les fonds euros ont-ils servi en 2025 selon France Assureurs ?',o:['2,6 %','1,3 %','4,0 %','0,9 %'],w:'2,6 % pour la troisième année de suite (2023, 2024 et 2025), net de frais de gestion et avant prélèvements sociaux.'},
+{q:'Un fonds euros sert 2,6 % brut de prélèvements sociaux (17,2 %). Quel est environ le taux net de prélèvements sociaux ?',o:['2,15 %','2,6 %','1,8 %','2,4 %'],w:'2,6 % × (1 − 0,172) ≈ 2,15 %, avant impôt sur le revenu éventuel.'},
+{q:'Dans un produit Phoenix, quand le coupon est-il versé ?',o:['Chaque année où l’indice est au-dessus de la barrière de coupon, même sans rappel','Uniquement au rappel du produit','Uniquement à l’échéance','Jamais avant l’échéance'],w:'Le Phoenix sépare la barrière de rappel (souvent 100 %) de la barrière de coupon (plus basse) : le coupon peut être versé sans que le produit s’arrête.'},
+{q:'Sur un autocall à 8 % par année écoulée, l’indice est à 130 % de son niveau de départ à la fin de l’année 1. Que reçoit le client ?',o:['108 % du capital : le coupon est fixé d’avance, la hausse n’entre pas dans le calcul','130 % du capital','100 % du capital sans coupon','108 % du capital chaque année pendant six ans'],w:'Le gain d’un autocall est plafonné au coupon prévu. Le produit s’arrête au rappel.'},
+{q:'Un client rachète une part d’un fonds eurocroissance avant l’échéance. Que reçoit-il ?',o:['La valeur des parts du jour, sans garantie du capital','Le capital garanti intégralement','Le capital garanti diminué de 20 %','Rien avant l’échéance : le rachat est impossible'],w:'La garantie ne joue qu’à l’échéance. Avant, on récupère la valeur de marché des parts, qui peut être inférieure aux sommes versées.'},
+{q:'Une obligation de duration 8 : que devient son prix environ si les taux montent de 1 point ?',o:['Il baisse d’environ 8 %','Il monte d’environ 8 %','Il baisse d’environ 1 %','Il ne bouge pas'],w:'Variation du prix ≈ − duration × variation des taux, soit environ −8 % pour une hausse de 1 point.'},
+{q:'Quel est l’écart entre une OAT à 10 ans et un Bund à 10 ans appelé ?',o:['Le spread OAT-Bund','Le TAEG','La courbe des taux','Le rendement réel'],w:'C’est la prime de risque demandée sur la dette française par rapport à la dette allemande.'}
+);
+// ---- typographie française sur les contenus ajoutés (hors balises)
+const fr=s=>s.split(/(<[^>]+>)/).map((p,i)=>i%2?p:p
+  .replace(/ ([:;?!»])/g,' $1').replace(/« /g,'« ')
+  .replace(/(\d) (%|€|M€|Md€|pb|points?|ans)(?![\p{L}])/gu,'$1 $2')
+  .replace(/(\d) (\d{3})(?!\d)/g,'$1 $2')).join('');
+(function w(x){
+  if(Array.isArray(x)){x.forEach((v,i)=>{if(typeof v==='string')x[i]=fr(v);else w(v)})}
+  else if(x&&typeof x==='object'){Object.keys(x).forEach(k=>{const v=x[k];if(typeof v==='string'){if(k!=='name'&&k!=='t'&&k!=='href')x[k]=fr(v)}else w(v)})}
+})(['cours-2a','cours-2b','cours-3','monetaire','av','obligations','graphiques','budget2027'].map(id=>fi(id).blocks));
+(function(){NOT.forEach(n=>{if(window.F927.NEW.indexOf(n[0])>=0){n[0]=fr(n[0]);n[1]=fr(n[1])}})})();
+QZ.slice(-8).forEach(q=>{q.q=fr(q.q);q.o=q.o.map(fr);q.w=fr(q.w)});
+// ---- accessibilité : barres de progression sans nom
+(function(){const _p=postRender;postRender=function(id,f){_p(id,f);try{document.querySelectorAll('[role="progressbar"]:not([aria-label]):not([aria-labelledby])').forEach(e=>e.setAttribute('aria-label','Progression des étapes'))}catch(e){}}})();
+// ---- style des liens vers les fiches
+const st=document.createElement('style');
+st.textContent='.xl{color:var(--acc,#1d4ed8);text-decoration:underline;text-underline-offset:2px;font-weight:600;white-space:normal}.xl:hover{text-decoration-thickness:2px}';
+document.head.appendChild(st);
 })();
 
 render();

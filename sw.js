@@ -1,5 +1,5 @@
 /* Service worker : met la page en cache pour un usage hors ligne (à placer à côté du fichier HTML, en https) */
-const V='cgp-v9-26';
+const V='cgp-v9-27';
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
