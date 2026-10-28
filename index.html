@@ -132,6 +132,7 @@ details.q .a{padding:10px 14px 4px}
 .wd{background:var(--surface);border:2px solid var(--acc);border-radius:16px;padding:16px;margin:0 0 22px}
 .wd h4{font-size:19px;margin-bottom:12px;color:var(--acc)}
 .ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px 18px}
+.srow{display:flex;gap:10px;align-items:center}.srow input[type=range]{flex:1;min-width:0}.nin{width:104px;flex:none;padding:7px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;text-align:right}.nin:focus{outline:2px solid var(--acc);outline-offset:1px}.rst{margin:8px 0 0;background:none;border:1.5px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 16px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;min-height:40px}.rst:hover{border-color:var(--acc);color:var(--ink)}
 .fld{display:block;font-size:15px}
 .fld span{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px;color:var(--muted)}
 .fld b{color:var(--ink)}
@@ -331,8 +332,27 @@ function slider(id,label,min,max,step,val,suf=''){return `<label class="fld"><sp
 function select(id,label,opts,val){return `<label class="fld"><span>${label}</span><select id="${id}">${opts.map(([v,t])=>`<option value="${v}" ${String(v)===String(val)?'selected':''}>${t}</option>`).join('')}</select></label>`}
 function bindWidget(el,calc,vis){
   const res=el.querySelector('.res');
+  /* saisie manuelle + réinitialisation */
+  const base=[];
+  el.querySelectorAll('input[type=range]').forEach(r=>{
+    const row=document.createElement('div');row.className='srow';r.parentNode.insertBefore(row,r);row.appendChild(r);
+    const n=document.createElement('input');n.type='number';n.className='nin';n.step=r.step||'any';n.inputMode='decimal';n.value=r.value;n.setAttribute('aria-label','Saisir la valeur : '+((r.closest('.fld')||{}).textContent||'').replace(/\s+/g,' ').slice(0,60));
+    if(r.dataset.suf)n.title=r.dataset.suf.trim();
+    row.appendChild(n);
+    base.push({r,n,min:r.min,max:r.max,v:r.value});
+    n.addEventListener('input',()=>{const x=parseFloat(String(n.value).replace(',','.'));if(isNaN(x))return;
+      if(x>+r.max)r.max=x;if(x<+r.min)r.min=x;r.value=x;});
+    n.addEventListener('blur',()=>{n.value=r.value});
+  });
+  const sels=[...el.querySelectorAll('select')].map(x=>({x,v:x.value}));
+  if(base.length||sels.length){
+    const rb=document.createElement('button');rb.type='button';rb.className='rst';rb.textContent='↺ Réinitialiser';
+    rb.addEventListener('click',()=>{base.forEach(o=>{o.r.min=o.min;o.r.max=o.max;o.r.value=o.v;o.n.value=o.v});sels.forEach(o=>{o.x.value=o.v});el.dispatchEvent(new Event('input',{bubbles:true}))});
+    const ctl=el.querySelector('.ctl');(ctl||el).appendChild(rb);
+  }
+  const syncN=()=>base.forEach(o=>{if(document.activeElement!==o.n)o.n.value=o.r.value});
   const upd=()=>{try{const cf=window.CONS&&CONS[el.dataset.w];if(cf)cf(id=>el.querySelector('#'+id))}catch(e){}const v={};
-    el.querySelectorAll('input,select').forEach(i=>{
+    el.querySelectorAll('input[id],select').forEach(i=>{
       v[i.id]=i.tagName==='SELECT'?parseFloat(i.value):+i.value;
       if(isNaN(v[i.id]))v[i.id]=i.value;
       const o=el.querySelector(`[data-out="${i.id}"]`);
@@ -341,7 +361,7 @@ function bindWidget(el,calc,vis){
     if(vis)for(const k in vis){const f=el.querySelector('#'+k);const w=f&&f.closest('.fld');if(w)w.style.display=vis[k](v)?'':'none'}
     try{res.innerHTML=calc(v)+stepsHTML(el.dataset.w,v)}catch(e){res.innerHTML='<p>Calcul indisponible.</p>'}
   };
-  el.addEventListener('input',upd);el.addEventListener('change',upd);upd();
+  el.addEventListener('input',()=>{upd();syncN()});el.addEventListener('change',()=>{upd();syncN()});upd();syncN();
 }
 
 /* ---- barèmes 2026 (revenus 2025) ---- */
@@ -434,8 +454,8 @@ av:{title:'Simulateur : impôt sur un rachat d’assurance-vie',
   const ps=gains*.172;let ir,det;
   if(!v.anc){ir=gains*.128;det='12,8 % sur les gains (PFU)'}else{const base=Math.max(0,gains-v.sit);ir=base*.075;det=`gains − abattement ${E(v.sit)} = ${E(base)} taxés à 7,5 %`}
   return kv('Part de gains dans le contrat',P(part*100,1))+kv('Gains contenus dans ton rachat',E(gains),'hl')+kv('Part de capital (non taxée)',E(R-gains))+
-  kv('Impôt sur le revenu',E(ir))+kv('Prélèvements sociaux (17,2 %)',E(ps))+kv('Net perçu',E(R-ir-ps),'hl')+
-  say(`Détail IR : ${det}. Le rachat ne peut pas dépasser la valeur du contrat, et les primes sont plafonnées à cette valeur (cas avec gains). Hypothèses : primes nettes ≤ 150 000 € (au-delà, 12,8 % s’applique à la fraction excédentaire), contrat en UC (sur fonds euros, les PS sont déjà prélevés chaque année).`)}},
+  kv('Abattement utilisé (situation : '+(v.sit>5000?'couple':'célibataire')+')',v.anc?E(Math.min(gains,v.sit)):'aucun avant 8 ans')+kv('Impôt sur le revenu',E(ir))+kv('Prélèvements sociaux (17,2 %)',E(ps))+kv('Net perçu',E(R-ir-ps),'hl')+
+  say(`${!v.anc?'La situation (célibataire ou couple) n’a aucun effet avant 8 ans : l’abattement n’existe qu’à partir de 8 ans. ':(gains<=4600?'Les gains rachetés ('+E(gains)+') sont inférieurs à l’abattement d’un célibataire (4 600 €) : l’impôt est nul dans les deux cas. Augmente le montant racheté (ou baisse les primes versées) pour voir la différence. ':'')}Détail IR : ${det}. Le rachat ne peut pas dépasser la valeur du contrat, et les primes sont plafonnées à cette valeur (cas avec gains). Hypothèses : primes nettes ≤ 150 000 € (au-delà, 12,8 % s’applique à la fraction excédentaire), contrat en UC (sur fonds euros, les PS sont déjà prélevés chaque année).`)}},
 
 per:{title:'Simulateur : le PER bat-il un investissement classique ?',
  ctl:()=>slider('ver','Versement sur le PER',1000,40000,500,10000,' €')+slider('rp','Revenu professionnel net de l’an dernier',20000,300000,5000,90000,' €')+select('te','TMI à l’entrée',[[.11,'11 %'],[.30,'30 %'],[.41,'41 %'],[.45,'45 %']],.41)+select('ts','TMI estimée à la sortie',[[0,'0 %'],[.11,'11 %'],[.30,'30 %'],[.41,'41 %']],.30)+slider('r','Rendement annuel',0,8,.5,4,' %')+slider('n','Durée avant la sortie',5,35,1,20,' ans'),
