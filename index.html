@@ -3694,6 +3694,28 @@ const FN={
  eurostat:['Eurostat · Indice des prix à la consommation harmonisé (IPCH)','https://ec.europa.eu/eurostat/web/hicp'],
  aft:['Agence France Trésor · Taux de l’OAT à 10 ans','https://www.aft.gouv.fr/fr/'],
  lf26:['Légifrance · Loi n° 2026-103 du 19 février 2026 de finances pour 2026 (recherche)',L+'search/all?tab_selection=all&searchField=ALL&query=loi+n%C2%B0+2026-103'],
+ c790a:['Légifrance · CGI, art. 790 A bis (don exonéré, logement neuf ou rénovation)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('article 790 A bis CGI')],
+ c790g:['Légifrance · CGI, art. 790 G (don familial de sommes d’argent)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('article 790 G CGI')],
+ c843:['Légifrance · Code civil, art. 843 (rapport des libéralités)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('article 843 code civil')],
+ c150bter:['Légifrance · CGI, art. 150-0 B ter (apport-cession)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('article 150-0 B ter CGI')],
+ c199tdec:['Légifrance · CGI, art. 199 terdecies-0 A bis (FCPI, FIP)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('article 199 terdecies-0 A bis')],
+ c199und:['Légifrance · CGI, art. 199 undecies B (Girardin industriel)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('article 199 undecies B CGI')],
+ c239:['Légifrance · CGI, art. 239 bis AB (option IR)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('article 239 bis AB CGI')],
+ d5419:['Légifrance · Code monétaire et financier, art. D541-9 (garanties du CIF)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('article D541-9 code monétaire et financier')],
+ ei:['Légifrance · Loi n° 2022-172 du 14 février 2022 (entrepreneur individuel)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('loi 2022-172 du 14 février 2022')],
+ lemoine:['Légifrance · Loi n° 2022-270 du 28 février 2022 (loi Lemoine)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('loi 2022-270 du 28 février 2022')],
+ lfss26:['Légifrance · Loi de financement de la Sécurité sociale pour 2026 (recherche)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('loi de financement de la sécurité sociale pour 2026')],
+ sofica:['Légifrance · CGI, art. 199 unvicies (Sofica)',L+'search/all?tab_selection=all&searchField=ALL&query='+encodeURIComponent('article 199 unvicies CGI')],
+ orias:['ORIAS · Registre des intermédiaires en assurance, banque et finance (accueil)','https://www.orias.fr/'],
+ amfcif:['AMF · Exercer une activité de CIF (accueil épargnants)','https://www.amf-france.org/fr'],
+ mif2:['AMF · La réglementation MIF 2 (directive déléguée 2017/593, art. 11 et 12)','https://www.amf-france.org/fr/reglementation/textes-europeens'],
+ tres:['Trésor américain · Courbe des taux (Daily Treasury Par Yield Curve)','https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve'],
+ bcetx:['BCE · Taux d’intérêt directeurs','https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.en.html'],
+ fed:['Réserve fédérale · Calendrier du FOMC','https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm'],
+ fedtx:['FRED · Fed funds, borne haute de la fourchette (DFEDTARU)','https://fred.stlouisfed.org/series/DFEDTARU'],
+ notins:['Notaires de France · Statistiques immobilières (accueil)','https://www.notaires.fr/'],
+ cl:['Crédit Logement · Observatoire (accueil)','https://www.creditlogement.fr/'],
+ retr:['L’Assurance retraite · Âge de départ (accueil)','https://www.lassuranceretraite.fr/'],
  pfusel:['Selectra · Flat tax à 31,4 % : les placements restés à 30 %','https://selectra.info/finance/actualites/marche/flat-tax-31-4-placements-restes-a-30-pourcent']
 };
 // motifs : la première occurrence dans la fiche reçoit la note
@@ -3716,6 +3738,8 @@ const PAT=[
  [['sp500'],/S&P\s?500/],[['vix'],/\bVIX\b/],[['bce'],/(prochaine réunion|taux de dépôt de la BCE|taux de dépôt à)/],[['plf'],/PLF 2027|projet de loi de finances pour 2027/],
  [['l1322'],/L132-13/],
  [['pertr','pertr3'],/jusqu’à 5\s?%|Jusqu’à 5\s?%|5\s?% d’un ancien contrat/],[['pertr','pertr2'],/(service-public\.gouv\.fr, 12 octobre 2026|[Dd]élais? maximaux?|2 à 3 mois)/],[['pertr'],/service-public\.gouv\.fr/],
+ [['c790a'],/790 A bis/],[['c790g'],/loi TEPA|don Sarkozy|790 G/],[['c843'],/article 843/],[['c150bter'],/150-0 B ter/],[['c199tdec'],/199 terdecies-0 A bis/],[['c199und'],/199 undecies B/],[['c239'],/239 bis AB/],[['d5419'],/D\. ?541-9/],[['ei'],/2022-172/],[['lemoine'],/loi Lemoine|2022-270/],[['lfss26'],/loi de financement de la Sécurité sociale pour 2026|PLFSS 2027/],[['sofica'],/Sofica/],
+ [['orias'],/\bORIAS\b/],[['amfcif'],/CIF/],[['mif2'],/MIF\s?2|2017\/593/],[['tres'],/Trésor américain/],[['bcetx'],/taux directeurs? de la BCE|BCE \(taux/],[['fed'],/FOMC/],[['fedtx'],/\bFed\b[^.]{0,40}(3,75|4,00)/],[['notins'],/Notaires-Insee/],[['cl'],/Crédit Logement/],[['retr'],/âge légal/],
  [['mifid'],/MiFID\s?II/],[['acpr'],/\bACPR\b/],[['amf'],/AMF, 2025/],[['eurostat'],/Eurostat/],[['aft'],/OAT à 10 ans/],[['lf26'],/loi de finances (pour )?2026|loi n° 2026-103/],[['pers'],/BOI-RSA-PENS-30-10-20/],
  [['pfueco','pfulf'],/31,4\s?%/],[['pfusel'],/restent? à 30\s?%|reste à 30\s?%|30\s?%\s?\(12,8/]
 ];
